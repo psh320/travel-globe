@@ -7,12 +7,6 @@ import { EdgesGeometry, ExtrudeGeometry, MathUtils, OrthographicCamera as ThreeO
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
 import { mockCountryArchiveSummaries } from "@/lib/archive/mock-country-archive-summaries";
-import {
-  createCountryArchiveIndex,
-  getCountryFill,
-  getMaxVisitCount,
-  getRelativeIntensity,
-} from "@/lib/color-scale/country-color-scale";
 import { createCameraTarget, mergeBounds } from "@/features/map/lib/camera-targets";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import { useMapEngineStore } from "@/features/map/store/map-engine-store";
@@ -145,8 +139,10 @@ function WorldContent() {
   const viewMode = useMapEngineStore((state) => state.viewMode);
   const resetView = useMapEngineStore((state) => state.resetView);
   const countries = useMemo(() => loadWorldCountryRecords(), []);
-  const archiveIndex = useMemo(() => createCountryArchiveIndex(mockCountryArchiveSummaries), []);
-  const maxVisitCount = useMemo(() => getMaxVisitCount(mockCountryArchiveSummaries), []);
+  const archiveIndex = useMemo(
+    () => new Map(mockCountryArchiveSummaries.map((entry) => [entry.countryCode, entry])),
+    [],
+  );
   const worldBounds = useMemo(
     () => mergeBounds(countries.map((country) => country.bounds)),
     [countries],
@@ -178,16 +174,22 @@ function WorldContent() {
       <group position={[0, 0, -0.35]}>
         {countries.map((country) => {
           const archiveEntry = archiveIndex.get(country.countryCode);
-          const intensity = getRelativeIntensity(archiveEntry?.visitCount ?? 0, maxVisitCount);
           const isHovered = hoveredCountryCode === country.countryCode;
           const isSelected = selectedCountryCode === country.countryCode;
+          const fill = isSelected
+            ? "#d9b58f"
+            : isHovered
+              ? archiveEntry
+                ? "#ead2ba"
+                : "#eeece6"
+              : archiveEntry?.baseFill ?? "#f7f5ef";
 
           return (
             <CountryShape
               key={country.countryCode}
               countryCode={country.countryCode}
               path={country.path}
-              fill={getCountryFill({ intensity, isHovered, isSelected })}
+              fill={fill}
               zOffset={isSelected ? 0.42 : isHovered ? 0.16 : 0}
             />
           );

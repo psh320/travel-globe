@@ -4,6 +4,7 @@ import { Box2, Vector2 } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import countriesTopology from "world-atlas/countries-110m.json";
 
+import { getAlpha2CountryCode } from "@/features/map/lib/country-code-map";
 import type { Bounds2D, WorldCountryRecord } from "@/features/map/types";
 
 const svgLoader = new SVGLoader();
@@ -66,15 +67,19 @@ export function loadWorldCountryRecords() {
   cachedCountries = world.features
     .map((country) => {
       const path = pathBuilder(country as never);
+      const countryCode = getAlpha2CountryCode({
+        numericCode: country.id,
+        displayName: country.properties.name,
+      });
 
-      if (!path || !country.properties.name) {
+      if (!path || !country.properties.name || !countryCode) {
         return null;
       }
 
       const bounds = getPathBounds(path);
 
       return {
-        countryCode: country.id,
+        countryCode,
         displayName: country.properties.name,
         bounds,
         centroid: [

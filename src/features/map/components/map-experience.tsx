@@ -6,14 +6,16 @@ import { WorldScene } from "@/features/map/components/world-scene";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import { useMapEngineStore } from "@/features/map/store/map-engine-store";
 import { mockCountryArchiveSummaries } from "@/lib/archive/mock-country-archive-summaries";
-import { createCountryArchiveIndex } from "@/lib/color-scale/country-color-scale";
 
 export function MapExperience() {
   const selectedCountryCode = useMapEngineStore((state) => state.selectedCountryCode);
   const viewMode = useMapEngineStore((state) => state.viewMode);
   const openSelectedCountry = useMapEngineStore((state) => state.openSelectedCountry);
   const resetView = useMapEngineStore((state) => state.resetView);
-  const archiveIndex = useMemo(() => createCountryArchiveIndex(mockCountryArchiveSummaries), []);
+  const archiveIndex = useMemo(
+    () => new Map(mockCountryArchiveSummaries.map((entry) => [entry.countryCode, entry])),
+    [],
+  );
   const countries = useMemo(() => loadWorldCountryRecords(), []);
   const selectedCountry =
     countries.find((country) => country.countryCode === selectedCountryCode) ?? null;
@@ -60,8 +62,8 @@ export function MapExperience() {
               </h2>
               <p className="max-w-xl text-sm leading-6 text-stone-600">
                 {selectedCountry && selectedArchive
-                  ? `${selectedArchive.visitCount} visits, ${selectedArchive.photoCount} photos, and ${selectedArchive.postCount} posts are driving the first-pass highlight intensity for this country.`
-                  : "Archive highlighting is connected to mock travel data. Countries with visits are tinted more warmly, while untouched countries stay near-white."}
+                  ? `${selectedArchive.visitCount} visits, ${selectedArchive.photoCount} photos, and ${selectedArchive.postCount} posts are reflected by shared archive highlight data for this country.`
+                  : "Country tinting is coming from shared archive highlight data, while untouched countries stay near-white."}
               </p>
             </div>
 
