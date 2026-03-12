@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type {
   ArchiveHighlight,
   MobileCountrySummary,
+  MobileSelectedCountry,
   PanelTab,
 } from "../types";
 import { DetailPanel } from "./detail-panel";
@@ -19,7 +20,7 @@ type AppShellProps = {
   onOpenUpload: () => void;
   onSelectCountry: (countryCode: string) => void;
   onSwitchTab: (tab: PanelTab) => void;
-  selectedCountry: MobileCountrySummary | null;
+  selectedCountry: MobileSelectedCountry | null;
   worldArchiveNotes: string[];
 };
 
@@ -205,7 +206,7 @@ function SelectionRail({
   onOpenCountry: (tab?: PanelTab) => void;
   onOpenUpload: () => void;
   onSelectCountry: (countryCode: string) => void;
-  selectedCountry: MobileCountrySummary | null;
+  selectedCountry: MobileSelectedCountry | null;
 }) {
   return (
     <section className="grid gap-3">
@@ -216,11 +217,13 @@ function SelectionRail({
         <div className="mt-3 space-y-3">
           <div>
             <p className="text-lg font-semibold text-[#172126]">
-              {selectedCountry?.countryName ?? "Choose a country"}
+              {selectedCountry?.displayName ?? "Choose a country"}
             </p>
             <p className="text-sm text-[#5f6d72]">
               {selectedCountry
-                ? `${selectedCountry.countryCode} • ${selectedCountry.visitCount} entries`
+                ? selectedCountry.summary
+                  ? `${selectedCountry.countryCode} • ${selectedCountry.summary.visitCount} entries`
+                  : `${selectedCountry.countryCode} • No archive entries yet`
                 : "Select from map output or the summary rail to open detail."}
             </p>
           </div>

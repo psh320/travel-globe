@@ -1,6 +1,6 @@
 import type {
   ArchiveHighlight,
-  MobileCountrySummary,
+  MobileSelectedCountry,
   PanelTab,
 } from "../types";
 
@@ -9,7 +9,7 @@ type DetailPanelProps = {
   archiveHighlights: ArchiveHighlight[];
   onClose: () => void;
   onSwitchTab: (tab: PanelTab) => void;
-  selectedCountry: MobileCountrySummary | null;
+  selectedCountry: MobileSelectedCountry | null;
   worldArchiveNotes: string[];
 };
 
@@ -24,7 +24,7 @@ export function DetailPanel({
   const title =
     activeTab === "upload"
       ? "Add a new memory"
-      : selectedCountry?.countryName ?? "World archive";
+      : selectedCountry?.displayName ?? "World archive";
 
   return (
     <section className="rounded-[1.75rem] border border-[rgba(23,33,38,0.1)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_70px_rgba(33,44,54,0.14)]">
@@ -74,15 +74,15 @@ export function DetailPanel({
               <div className="grid grid-cols-3 gap-2">
                 <StatCard
                   label="Entries"
-                  value={String(selectedCountry.visitCount)}
+                  value={String(selectedCountry.summary?.visitCount ?? 0)}
                 />
                 <StatCard
                   label="Cities"
-                  value={String(selectedCountry.uniqueCityCount)}
+                  value={String(selectedCountry.summary?.uniqueCityCount ?? 0)}
                 />
                 <StatCard
                   label="Last saved"
-                  value={selectedCountry.lastVisitedAt ?? "No date"}
+                  value={selectedCountry.summary?.lastVisitedAt ?? "No date"}
                 />
               </div>
 
@@ -95,25 +95,39 @@ export function DetailPanel({
                   sections, and richer Map Engine detail views as those outputs land.
                 </p>
                 <div className="mt-3 inline-flex min-h-11 items-center rounded-full border border-[rgba(23,33,38,0.1)] bg-white px-4 text-sm text-[#172126]">
-                  {selectedCountry.countryCode} • Intensity bucket {selectedCountry.intensityBucket}
+                  {selectedCountry.summary
+                    ? `${selectedCountry.countryCode} • Intensity bucket ${selectedCountry.summary.intensityBucket}`
+                    : `${selectedCountry.countryCode} • No saved archive yet`}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                {archiveHighlights.map((item) => (
-                  <article
-                    key={item.id}
-                    className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
-                  >
-                    <p className="text-sm font-semibold text-[#172126]">
-                      {item.title}
-                    </p>
-                    <p className="mt-1 text-sm text-[#5f6d72]">
-                      {item.subtitle}
-                    </p>
-                  </article>
-                ))}
-              </div>
+              {archiveHighlights.length > 0 ? (
+                <div className="space-y-2">
+                  {archiveHighlights.map((item) => (
+                    <article
+                      key={item.id}
+                      className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
+                    >
+                      <p className="text-sm font-semibold text-[#172126]">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-sm text-[#5f6d72]">
+                        {item.subtitle}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4">
+                  <p className="text-sm font-semibold text-[#172126]">
+                    No archive entries yet
+                  </p>
+                  <p className="mt-1 text-sm text-[#5f6d72]">
+                    This country is selected and focus-ready, but there are no saved
+                    visits to show in the archive panel yet.
+                  </p>
+                </article>
+              )}
             </>
           ) : (
             <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-[#f7f4ee] p-4">
