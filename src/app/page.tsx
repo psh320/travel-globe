@@ -6,5 +6,10 @@ export default async function Home() {
     themeName: "red",
   });
 
-  return <MobileMapEntry initialArchiveEntries={persistedArchive?.entries} />;
+  return (
+    <MobileMapEntry
+      initialArchiveEntries={persistedArchive?.entries}
+      initialVisitDetails={persistedArchive?.visitDetails}
+    />
+  );
 }

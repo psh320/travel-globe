@@ -1,24 +1,32 @@
-import type {
-  ArchiveHighlight,
-  MobileSelectedCountry,
-  PanelTab,
-} from "../types";
+import type { CountryDetailSummary } from "@/lib/archive";
+
+import type { DetailListCard, DetailStat, MobileSelectedCountry, PanelTab } from "../types";
 
 type DetailPanelProps = {
   activeTab: PanelTab;
-  archiveHighlights: ArchiveHighlight[];
+  countryDetailSummary: CountryDetailSummary | null;
+  countryMemoryCards: DetailListCard[];
+  countryStats: DetailStat[];
+  cityCards: DetailListCard[];
   onClose: () => void;
   onSwitchTab: (tab: PanelTab) => void;
   selectedCountry: MobileSelectedCountry | null;
+  worldArchiveCards: DetailListCard[];
+  worldSummaryCards: DetailListCard[];
   worldArchiveNotes: string[];
 };
 
 export function DetailPanel({
   activeTab,
-  archiveHighlights,
+  countryDetailSummary,
+  countryMemoryCards,
+  countryStats,
+  cityCards,
   onClose,
   onSwitchTab,
   selectedCountry,
+  worldArchiveCards,
+  worldSummaryCards,
   worldArchiveNotes,
 }: DetailPanelProps) {
   const title =
@@ -71,52 +79,47 @@ export function DetailPanel({
         <div className="mt-4 space-y-4">
           {selectedCountry ? (
             <>
-              <div className="grid grid-cols-3 gap-2">
-                <StatCard
-                  label="Entries"
-                  value={String(selectedCountry.summary?.visitCount ?? 0)}
-                />
-                <StatCard
-                  label="Cities"
-                  value={String(selectedCountry.summary?.uniqueCityCount ?? 0)}
-                />
-                <StatCard
-                  label="Last saved"
-                  value={selectedCountry.summary?.lastVisitedAt ?? "No date"}
-                />
+              <div className="grid grid-cols-2 gap-2">
+                {(countryStats.length > 0
+                  ? countryStats
+                  : [
+                      {
+                        label: "Entries",
+                        value: String(selectedCountry.summary?.visitCount ?? 0),
+                      },
+                      {
+                        label: "Cities",
+                        value: String(selectedCountry.summary?.uniqueCityCount ?? 0),
+                      },
+                    ]).map((stat) => (
+                  <StatCard key={stat.label} label={stat.label} value={stat.value} />
+                ))}
               </div>
 
               <div className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-[#f7f4ee] p-4">
                 <p className="text-sm font-semibold text-[#172126]">
-                  Country detail shell
+                  Country detail
                 </p>
                 <p className="mt-2 text-sm text-[#5f6d72]">
-                  This panel is ready for focused country stats, grouped archive
-                  sections, and richer Map Engine detail views as those outputs land.
+                  Stats lead, city grouping follows, and saved memories stay visible
+                  in the same touch-friendly sheet.
                 </p>
                 <div className="mt-3 inline-flex min-h-11 items-center rounded-full border border-[rgba(23,33,38,0.1)] bg-white px-4 text-sm text-[#172126]">
-                  {selectedCountry.summary
-                    ? `${selectedCountry.countryCode} • Intensity bucket ${selectedCountry.summary.intensityBucket}`
+                  {countryDetailSummary
+                    ? `${selectedCountry.countryCode} • ${countryDetailSummary.photoAssetCount} photos • ${countryDetailSummary.travelPostCount} posts`
                     : `${selectedCountry.countryCode} • No saved archive yet`}
                 </div>
               </div>
 
-              {archiveHighlights.length > 0 ? (
-                <div className="space-y-2">
-                  {archiveHighlights.map((item) => (
-                    <article
-                      key={item.id}
-                      className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
-                    >
-                      <p className="text-sm font-semibold text-[#172126]">
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-sm text-[#5f6d72]">
-                        {item.subtitle}
-                      </p>
-                    </article>
-                  ))}
-                </div>
+              {cityCards.length > 0 ? (
+                <SectionCards heading="City groups" cards={cityCards} />
+              ) : null}
+
+              {countryMemoryCards.length > 0 ? (
+                <SectionCards
+                  heading="Saved memories"
+                  cards={countryMemoryCards.slice(0, 5)}
+                />
               ) : (
                 <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4">
                   <p className="text-sm font-semibold text-[#172126]">
@@ -145,25 +148,36 @@ export function DetailPanel({
 
       {activeTab === "archive" ? (
         <div className="mt-4 space-y-3">
-          {(selectedCountry ? archiveHighlights : worldArchiveNotes).map((item) => (
-            <article
-              key={typeof item === "string" ? item : item.id}
-              className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
-            >
-              {typeof item === "string" ? (
-                <p className="text-sm text-[#172126]">{item}</p>
-              ) : (
-                <>
-                  <p className="text-sm font-semibold text-[#172126]">
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-sm text-[#5f6d72]">
-                    {item.subtitle}
-                  </p>
-                </>
-              )}
-            </article>
-          ))}
+          {selectedCountry ? (
+            <>
+              {countryMemoryCards.length > 0 ? (
+                <SectionCards
+                  heading={`${selectedCountry.displayName} archive`}
+                  cards={countryMemoryCards}
+                />
+              ) : null}
+              {cityCards.length > 0 ? (
+                <SectionCards heading="By city" cards={cityCards} />
+              ) : null}
+            </>
+          ) : (
+            <>
+              {worldSummaryCards.length > 0 ? (
+                <SectionCards heading="Top countries" cards={worldSummaryCards} />
+              ) : null}
+              {worldArchiveCards.length > 0 ? (
+                <SectionCards heading="Recent memories" cards={worldArchiveCards} />
+              ) : null}
+              {worldArchiveNotes.map((item) => (
+                <article
+                  key={item}
+                  className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
+                >
+                  <p className="text-sm text-[#172126]">{item}</p>
+                </article>
+              ))}
+            </>
+          )}
         </div>
       ) : null}
 
@@ -171,14 +185,14 @@ export function DetailPanel({
         <div className="mt-4 space-y-3">
           <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-[#f7f4ee] p-4">
             <p className="text-sm font-semibold text-[#172126]">
-              Photo upload shell
+              Upload flow next
             </p>
             <p className="mt-2 text-sm text-[#5f6d72]">
-              Large drop zone, visible progress, and a plain-language location
-              review step fit naturally into the mobile sheet.
+              Wave 4 keeps the shell ready for photo upload, EXIF review, and
+              manual correction while the real create flow lands next.
             </p>
             <div className="mt-3 rounded-[1.25rem] border border-dashed border-[rgba(23,33,38,0.1)] bg-white px-4 py-6 text-sm text-[#5f6d72]">
-              Upload from camera roll, then confirm country and city if needed.
+              Upload from camera roll, then confirm country and city before save.
             </div>
           </article>
           <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4">
@@ -206,5 +220,45 @@ function StatCard({ label, value }: { label: string; value: string }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function SectionCards({
+  cards,
+  heading,
+}: {
+  cards: DetailListCard[];
+  heading: string;
+}) {
+  return (
+    <section className="space-y-2">
+      <p className="text-xs font-medium uppercase tracking-[0.24em] text-[#5f6d72]">
+        {heading}
+      </p>
+      {cards.map((item) => (
+        <article
+          key={item.id}
+          className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4"
+        >
+          <p className="text-sm font-semibold text-[#172126]">{item.title}</p>
+          <p className="mt-1 text-sm text-[#5f6d72]">{item.subtitle}</p>
+          {item.supportingText ? (
+            <p className="mt-2 text-sm text-[#3e4a50]">{item.supportingText}</p>
+          ) : null}
+          {item.meta.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {item.meta.map((metaItem) => (
+                <span
+                  key={metaItem}
+                  className="inline-flex min-h-9 items-center rounded-full bg-[#eef1ec] px-3 text-xs font-medium text-[#304048]"
+                >
+                  {metaItem}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </article>
+      ))}
+    </section>
   );
 }

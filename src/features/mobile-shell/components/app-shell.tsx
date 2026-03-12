@@ -1,17 +1,17 @@
 import type { ReactNode } from "react";
 
-import type {
-  ArchiveHighlight,
-  MobileCountrySummary,
-  MobileSelectedCountry,
-  PanelTab,
-} from "../types";
+import type { CountryDetailSummary } from "@/lib/archive";
+
+import type { DetailListCard, DetailStat, MobileCountrySummary, MobileSelectedCountry, PanelTab } from "../types";
 import { DetailPanel } from "./detail-panel";
 
 type AppShellProps = {
   activeTab: PanelTab;
-  archiveHighlights: ArchiveHighlight[];
+  countryDetailSummary: CountryDetailSummary | null;
+  countryMemoryCards: DetailListCard[];
+  countryStats: DetailStat[];
   countrySummaries: MobileCountrySummary[];
+  cityCards: DetailListCard[];
   isDetailOpen: boolean;
   mapViewport: ReactNode;
   onClosePanel: () => void;
@@ -21,13 +21,18 @@ type AppShellProps = {
   onSelectCountry: (countryCode: string) => void;
   onSwitchTab: (tab: PanelTab) => void;
   selectedCountry: MobileSelectedCountry | null;
+  worldArchiveCards: DetailListCard[];
+  worldSummaryCards: DetailListCard[];
   worldArchiveNotes: string[];
 };
 
 export function AppShell({
   activeTab,
-  archiveHighlights,
+  countryDetailSummary,
+  countryMemoryCards,
+  countryStats,
   countrySummaries,
+  cityCards,
   isDetailOpen,
   mapViewport,
   onClosePanel,
@@ -37,6 +42,8 @@ export function AppShell({
   onSelectCountry,
   onSwitchTab,
   selectedCountry,
+  worldArchiveCards,
+  worldSummaryCards,
   worldArchiveNotes,
 }: AppShellProps) {
   return (
@@ -131,10 +138,15 @@ export function AppShell({
           <div className="sticky top-6">
             <DetailPanel
               activeTab={activeTab}
-              archiveHighlights={archiveHighlights}
+              countryDetailSummary={countryDetailSummary}
+              countryMemoryCards={countryMemoryCards}
+              countryStats={countryStats}
+              cityCards={cityCards}
               onClose={onClosePanel}
               onSwitchTab={onSwitchTab}
               selectedCountry={selectedCountry}
+              worldArchiveCards={worldArchiveCards}
+              worldSummaryCards={worldSummaryCards}
               worldArchiveNotes={worldArchiveNotes}
             />
           </div>
@@ -180,10 +192,15 @@ export function AppShell({
             <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-[rgba(23,33,38,0.12)]" />
             <DetailPanel
               activeTab={activeTab}
-              archiveHighlights={archiveHighlights}
+              countryDetailSummary={countryDetailSummary}
+              countryMemoryCards={countryMemoryCards}
+              countryStats={countryStats}
+              cityCards={cityCards}
               onClose={onClosePanel}
               onSwitchTab={onSwitchTab}
               selectedCountry={selectedCountry}
+              worldArchiveCards={worldArchiveCards}
+              worldSummaryCards={worldSummaryCards}
               worldArchiveNotes={worldArchiveNotes}
             />
           </div>

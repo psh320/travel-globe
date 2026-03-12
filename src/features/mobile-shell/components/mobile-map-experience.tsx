@@ -13,25 +13,31 @@ import {
 import type { MapHostSnapshot, MapInteractionState } from "@/features/map/types";
 import {
   createArchiveVisitEntries,
-  getCountryDetailSummary,
   getWorldMapCountrySummaries,
   getArchiveCounts,
   type ArchiveVisitEntry,
 } from "@/lib/archive";
+import type { ArchiveVisitDetail } from "@/lib/supabase";
 
+import {
+  buildCountryArchivePanelData,
+  buildWorldArchivePanelData,
+} from "../archive-panel-data";
 import {
   deriveSelectedCountry,
   syncPanelTabWithMapSnapshot,
 } from "../integration-state";
-import type { ArchiveHighlight, PanelTab } from "../types";
+import type { PanelTab } from "../types";
 import { AppShell } from "./app-shell";
 
 type MobileMapExperienceProps = {
   initialArchiveEntries?: ArchiveVisitEntry[];
+  initialVisitDetails?: ArchiveVisitDetail[];
 };
 
 export function MobileMapExperience({
   initialArchiveEntries,
+  initialVisitDetails,
 }: MobileMapExperienceProps) {
   const [mapState, setMapState] = useState<MapInteractionState>(
     defaultMapInteractionState,
@@ -40,6 +46,10 @@ export function MobileMapExperience({
   const archiveEntries = useMemo(
     () => initialArchiveEntries ?? createArchiveVisitEntries(mockVisitRecords),
     [initialArchiveEntries],
+  );
+  const archiveVisitDetails = useMemo(
+    () => initialVisitDetails ?? [],
+    [initialVisitDetails],
   );
   const archiveVisits = useMemo(
     () => archiveEntries.map((entry) => entry.visit),
@@ -54,23 +64,25 @@ export function MobileMapExperience({
     () => deriveSelectedCountry(mapState.selectedCountryCode, countrySummaries),
     [countrySummaries, mapState.selectedCountryCode],
   );
-  const countryDetail = useMemo(
+  const countryPanelData = useMemo(
     () =>
-      selectedCountry
-        ? getCountryDetailSummary(archiveEntries, selectedCountry.countryCode, {
-            themeName: "red",
-          })
-        : null,
-    [archiveEntries, selectedCountry],
+      buildCountryArchivePanelData(
+        archiveEntries,
+        archiveVisitDetails,
+        selectedCountry?.countryCode,
+      ),
+    [archiveEntries, archiveVisitDetails, selectedCountry?.countryCode],
+  );
+  const worldPanelData = useMemo(
+    () =>
+      buildWorldArchivePanelData(
+        countrySummaries,
+        archiveEntries,
+        archiveVisitDetails,
+      ),
+    [archiveEntries, archiveVisitDetails, countrySummaries],
   );
   const archiveCounts = useMemo(() => getArchiveCounts(archiveVisits), [archiveVisits]);
-  const archiveHighlights: ArchiveHighlight[] = (countryDetail?.cityGroups ?? [])
-    .slice(0, 4)
-    .map((city) => ({
-      id: `${city.countryCode}-${city.cityName}`,
-      title: city.cityName,
-      subtitle: `${city.visitCount} entries • ${city.photoAssetCount} photos • ${city.travelPostCount} posts`,
-    }));
   const worldArchiveNotes = [
     `${archiveCounts.totalVisits} saved visits are ready for archive browsing.`,
     `${archiveCounts.countriesVisited} countries and ${archiveCounts.citiesVisited} cities are available in the current archive dataset.`,
@@ -128,8 +140,11 @@ export function MobileMapExperience({
   return (
     <AppShell
       activeTab={activeTab}
-      archiveHighlights={archiveHighlights}
+      countryDetailSummary={countryPanelData.summary}
+      countryMemoryCards={countryPanelData.memoryCards}
+      countryStats={countryPanelData.stats}
       countrySummaries={countrySummaries}
+      cityCards={countryPanelData.cityCards}
       isDetailOpen={panelTab !== null}
       mapViewport={
         <MapHost
@@ -147,6 +162,8 @@ export function MobileMapExperience({
       onSelectCountry={handleSelectCountry}
       onSwitchTab={setPanelTab}
       selectedCountry={selectedCountry}
+      worldArchiveCards={worldPanelData.memoryCards}
+      worldSummaryCards={worldPanelData.summaryCards}
       worldArchiveNotes={worldArchiveNotes}
     />
   );

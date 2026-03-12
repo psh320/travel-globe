@@ -2,83 +2,87 @@
 
 ## Current status
 
-- Current repository state: bootstrap only
+- Current repository state: integrated mobile-first archive experience
 - `npm run lint`: passes
 - `npm run build`: passes
 - `npm run test`: passes
-- Approved milestone progress: none
+- Approved milestone progress:
+  - Wave 1 foundation shell: complete
+  - Wave 2 persistence/read-model integration: complete
+  - Wave 3 focus mode and country detail foundation: complete
 
-## Current wave - Wave 1 foundation shell
+## Completed wave - Wave 1 foundation shell
 
 ### Objective
 
 Ship a mergeable foundation slice that replaces the starter app with a Travel Globe-specific shell, establishes subsystem boundaries, and proves the map, mobile UX, and color/data layers can integrate without Supabase dependency.
 
-### Agent ownership
-
-#### Map Engine Agent
-
-- [ ] Add React Three Fiber and Drei dependencies
-- [ ] Create a minimal `features/map` foundation that renders a lightweight world scene shell
-- [ ] Stub country geometry/data loading boundary without coupling to Supabase or mobile drawer code
-- [ ] Expose typed selection events for other layers to consume
-
-#### Mobile UX Agent
-
-- [ ] Replace the starter landing page with a mobile-first app shell
-- [ ] Build touch-safe header, primary action area, and responsive detail-sheet scaffold
-- [ ] Provide explicit open/view affordances so focus is never hover-dependent
-- [ ] Keep copy and layout aligned with Travel Globe product language
-
-#### Color & Data Logic Agent
-
-- [ ] Create pure typed modules for mock visit summaries and relative intensity calculation
-- [ ] Define theme scale structure for at least one full theme
-- [ ] Provide map-facing selectors/adapters using mock data only
-- [ ] Add unit tests for intensity calculation utilities
-
-#### Supabase Agent
-
-- [ ] Do not start persistence UI yet
-- [ ] Add typed `lib/supabase` placeholder boundaries and env validation surface only if needed for compilation
-- [ ] Draft schema/tasks for Wave 2 without coupling unfinished auth/storage code into Wave 1
-
 ### Exit criteria
 
-- [ ] Starter content removed
-- [ ] Travel Globe app shell renders on mobile and desktop
-- [ ] Minimal map scene foundation compiles
-- [ ] Mock archive intensity data can drive UI state
-- [ ] At least one working unit test command exists and passes
-- [ ] `npm run lint`
-- [ ] `npm run test`
-- [ ] `npm run build`
+- [x] Starter content removed
+- [x] Travel Globe app shell renders on mobile and desktop
+- [x] Minimal map scene foundation compiles
+- [x] Mock archive intensity data can drive UI state
+- [x] At least one working unit test command exists and passes
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
 
-## Upcoming wave - Wave 2 persistence and archive ingestion
+## Completed wave - Wave 2 persistence and archive ingestion
 
-- [ ] Configure Supabase client setup
-- [ ] Define schema for `users`, `visits`, `photo_assets`, and `travel_posts`
-- [ ] Configure Supabase Storage for images
-- [ ] Add auth/session bootstrap
+- [x] Configure Supabase client setup
+- [x] Define schema for `profiles`, `visits`, `photo_assets`, and `travel_posts`
+- [x] Configure Supabase Storage helpers and conventions
+- [x] Add auth/session bootstrap
+- [x] Build persisted archive read-model helpers
+- [x] Adapt persisted rows into shared archive types
+- [x] Reflect persisted archive counts on the map
 - [ ] Build photo upload flow with progress and failure states
 - [ ] Parse EXIF metadata on upload
 - [ ] Add manual location correction flow
-- [ ] Save visit records to Supabase
-- [ ] Reflect persisted archive counts on the map
+- [ ] Save visit records from the new create flow
 
-## Later wave - Wave 3 focus mode and country detail
+## Completed wave - Wave 3 focus mode and country detail
 
-- [ ] Build selection-to-focus interaction
-- [ ] Add smooth camera transition
-- [ ] Implement focused country mode
+- [x] Build selection-to-focus interaction
+- [x] Add smooth camera transition
+- [x] Implement focused country mode
+- [x] Build country stats panel foundation
+- [x] Add grouping/filtering by city
+- [x] Add back-to-world interaction
+- [x] Ensure mobile-focused detail presentation works well
 - [ ] Reveal city-level boundaries where data is available
-- [ ] Build country stats panel
-- [ ] Build photo/post gallery
-- [ ] Add grouping/filtering by city
-- [ ] Add back-to-world interaction
-- [ ] Ensure mobile-focused detail presentation works well
+- [ ] Build richer photo/post gallery views
 
-## Later wave - Wave 4 hardening and polish
+## Current wave - Wave 4 archive UX hardening
+
+### Objective
+
+Replace placeholder shell content with real persisted archive browsing and country-detail content, while tightening tests and project docs around the current integrated architecture.
+
+### Implementation
+
+- [x] Feed persisted visit details through the app read model
+- [x] Replace placeholder country detail cards with real stats, city groups, and saved memory cards
+- [x] Replace placeholder archive tab content with real top-country and recent-memory content
+- [x] Preserve mobile-first sheet behavior and touch-first actions
+- [x] Add targeted tests for archive panel data shaping
+- [x] Update README/TASKS to match the real project state
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+
+## Next wave - Wave 5 archive creation flow
+
+- [ ] Build photo upload UI with visible progress, success, and failure states
+- [ ] Add text-entry creation flow
+- [ ] Parse EXIF metadata on selected photos
+- [ ] Infer country/city when practical and show confidence clearly
+- [ ] Allow manual country/city correction before save
+- [ ] Persist visits, photo assets, and travel posts from the create flow
+- [ ] Refresh the read model after save so map/detail state updates immediately
+
+## Later wave - Wave 6 polish and release hardening
 
 - [ ] Improve animation quality
 - [ ] Improve rendering and interaction performance
@@ -86,6 +90,5 @@ Ship a mergeable foundation slice that replaces the starter app with a Travel Gl
 - [ ] Add tests for selection/focus flow
 - [ ] Add tests for archive persistence flow
 - [ ] Add e2e test for the primary happy path
-- [ ] Update README
-- [ ] Update architecture docs
+- [ ] Update architecture docs with the final integrated flow
 - [ ] Final self-review pass

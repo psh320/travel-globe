@@ -132,6 +132,13 @@ This keeps object ownership aligned with row-level policies and lets the app der
 3. User uploads photos or adds travel posts; EXIF is used to infer location when possible.
 4. Tapping a country opens the detail view with cities and travel memories.
 
+The current integrated shell now:
+
+- renders persisted archive intensity on the world map when a session is available
+- opens a mobile-first country detail sheet with real stats and city grouping
+- shows recent saved memories and top-country summaries in the archive panel
+- falls back to mock archive data when persisted user data is unavailable
+
 ---
 
 ## Mobile experience
@@ -170,7 +177,14 @@ Agents should read these before making changes:
 
 ## Development strategy
 
-Work is organized in **waves** (e.g. foundation → integration → core experience → intelligence → polish). Each wave uses four specialist agents plus one review agent; approved work is merged before the next wave.
+Work is organized in **waves**. The repository has already completed:
+
+- Wave 1: foundation shell
+- Wave 2: persistence/read-model integration
+- Wave 3: focus mode and country detail foundation
+- Wave 4: archive UX hardening
+
+The next implementation wave is the real archive creation flow: photo upload, EXIF-assisted inference, manual correction, and save-back into the integrated map/detail experience.
 
 ---
 

@@ -15,3 +15,16 @@ export type ArchiveHighlight = {
   title: string;
   subtitle: string;
 };
+
+export type DetailStat = {
+  label: string;
+  value: string;
+};
+
+export type DetailListCard = {
+  id: string;
+  title: string;
+  subtitle: string;
+  supportingText?: string;
+  meta: string[];
+};
