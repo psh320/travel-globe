@@ -2,16 +2,13 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
-import { useMemo, useRef, type RefObject } from "react";
+import { useMemo, useRef, useState, type RefObject } from "react";
 import { EdgesGeometry, ExtrudeGeometry, MathUtils, OrthographicCamera as ThreeOrthographicCamera, Shape } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
-import { mockVisitRecords } from "@/features/map/data/mock-visit-records";
 import { createCameraTarget, mergeBounds } from "@/features/map/lib/camera-targets";
-import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
-import { useMapEngineStore } from "@/features/map/store/map-engine-store";
-import { getCountryMapSummaries } from "@/lib/archive";
-import { getTheme } from "@/lib/color-scale";
+import type { MapViewMode, WorldCountryRecord } from "@/features/map/types";
+import type { CountryMapSummary } from "@/lib/archive";
 
 function MapCameraRig({
   cameraRef,
@@ -45,15 +42,17 @@ function CountryShape({
   countryCode,
   path,
   fill,
+  onCountryPress,
+  onHoverChange,
   zOffset,
 }: {
   countryCode: string;
   path: string;
   fill: string;
+  onCountryPress: (countryCode: string) => void;
+  onHoverChange: (countryCode: string | null) => void;
   zOffset: number;
 }) {
-  const setHoveredCountryCode = useMapEngineStore((state) => state.setHoveredCountryCode);
-  const pressCountry = useMapEngineStore((state) => state.pressCountry);
   const shapes = useMemo(() => {
     const { paths } = new SVGLoader().parse(
       `<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" /></svg>`,
@@ -71,8 +70,8 @@ function CountryShape({
           shape={shape}
           fill={fill}
           zOffset={zOffset}
-          onHoverChange={setHoveredCountryCode}
-          onPress={pressCountry}
+          onHoverChange={onHoverChange}
+          onPress={onCountryPress}
         />
       ))}
     </group>
@@ -133,25 +132,26 @@ function CountrySurface({
   );
 }
 
-function WorldContent() {
+function WorldContent({
+  archiveIndex,
+  countries,
+  emptyColor,
+  onCountryPress,
+  onDismiss,
+  selectedCountryCode,
+  viewMode,
+}: {
+  archiveIndex: Map<string, CountryMapSummary>;
+  countries: WorldCountryRecord[];
+  emptyColor: string;
+  onCountryPress: (countryCode: string) => void;
+  onDismiss: () => void;
+  selectedCountryCode: string | null;
+  viewMode: MapViewMode;
+}) {
   const { size } = useThree();
   const cameraRef = useRef<ThreeOrthographicCamera | null>(null);
-  const hoveredCountryCode = useMapEngineStore((state) => state.hoveredCountryCode);
-  const selectedCountryCode = useMapEngineStore((state) => state.selectedCountryCode);
-  const viewMode = useMapEngineStore((state) => state.viewMode);
-  const resetView = useMapEngineStore((state) => state.resetView);
-  const countries = useMemo(() => loadWorldCountryRecords(), []);
-  const theme = useMemo(() => getTheme("red"), []);
-  const archiveIndex = useMemo(
-    () =>
-      new Map(
-        getCountryMapSummaries(mockVisitRecords, { themeName: "red" }).map((entry) => [
-          entry.countryCode,
-          entry,
-        ]),
-      ),
-    [],
-  );
+  const [hoveredCountryCode, setHoveredCountryCode] = useState<string | null>(null);
   const worldBounds = useMemo(
     () => mergeBounds(countries.map((country) => country.bounds)),
     [countries],
@@ -191,7 +191,7 @@ function WorldContent() {
               ? archiveEntry
                 ? "#ead2ba"
                 : "#eeece6"
-              : archiveEntry?.fillColor ?? theme.emptyColor;
+              : archiveEntry?.fillColor ?? emptyColor;
 
           return (
             <CountryShape
@@ -199,6 +199,8 @@ function WorldContent() {
               countryCode={country.countryCode}
               path={country.path}
               fill={fill}
+              onCountryPress={onCountryPress}
+              onHoverChange={setHoveredCountryCode}
               zOffset={isSelected ? 0.42 : isHovered ? 0.16 : 0}
             />
           );
@@ -206,7 +208,7 @@ function WorldContent() {
       </group>
       <mesh
         position={[0, 0, -4]}
-        onPointerDown={() => resetView()}
+        onPointerDown={() => onDismiss()}
         receiveShadow
       >
         <planeGeometry args={[1000, 1000]} />
@@ -216,19 +218,45 @@ function WorldContent() {
   );
 }
 
-export function WorldScene() {
-  const resetView = useMapEngineStore((state) => state.resetView);
-
+export function WorldScene({
+  archiveIndex,
+  className,
+  countries,
+  emptyColor,
+  onCountryPress,
+  onDismiss,
+  selectedCountryCode,
+  viewMode,
+}: {
+  archiveIndex: Map<string, CountryMapSummary>;
+  className?: string;
+  countries: WorldCountryRecord[];
+  emptyColor: string;
+  onCountryPress: (countryCode: string) => void;
+  onDismiss: () => void;
+  selectedCountryCode: string | null;
+  viewMode: MapViewMode;
+}) {
   return (
-    <Canvas
-      orthographic
-      className="h-full w-full"
-      dpr={[1, 1.6]}
-      gl={{ antialias: true }}
-      onPointerMissed={() => resetView()}
-      shadows
-    >
-      <WorldContent />
-    </Canvas>
+    <div className={className ?? "h-full w-full"}>
+      <Canvas
+        orthographic
+        className="h-full w-full"
+        dpr={[1, 1.6]}
+        gl={{ antialias: true }}
+        onPointerMissed={() => onDismiss()}
+        shadows
+      >
+        <WorldContent
+          archiveIndex={archiveIndex}
+          countries={countries}
+          emptyColor={emptyColor}
+          onCountryPress={onCountryPress}
+          onDismiss={onDismiss}
+          selectedCountryCode={selectedCountryCode}
+          viewMode={viewMode}
+        />
+      </Canvas>
+    </div>
   );
 }

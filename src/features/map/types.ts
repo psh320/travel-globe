@@ -1,3 +1,5 @@
+import type { CountryMapSummary } from "@/lib/archive";
+
 export type Bounds2D = {
   minX: number;
   minY: number;
@@ -20,3 +22,19 @@ export type WorldCountryRecord = {
 };
 
 export type MapViewMode = "world" | "country";
+
+export type MapInteractionState = {
+  selectedCountryCode: string | null;
+  viewMode: MapViewMode;
+};
+
+export type MapCountrySelection = {
+  countryCode: string;
+  displayName: string;
+  summary: CountryMapSummary | null;
+};
+
+export type MapHostSnapshot = MapInteractionState & {
+  focusedCountry: MapCountrySelection | null;
+  selectedCountry: MapCountrySelection | null;
+};
