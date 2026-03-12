@@ -3,9 +3,10 @@
 import { useMemo } from "react";
 
 import { WorldScene } from "@/features/map/components/world-scene";
+import { mockVisitRecords } from "@/features/map/data/mock-visit-records";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import { useMapEngineStore } from "@/features/map/store/map-engine-store";
-import { mockCountryArchiveSummaries } from "@/lib/archive/mock-country-archive-summaries";
+import { getCountryMapSummaries } from "@/lib/archive";
 
 export function MapExperience() {
   const selectedCountryCode = useMapEngineStore((state) => state.selectedCountryCode);
@@ -13,7 +14,13 @@ export function MapExperience() {
   const openSelectedCountry = useMapEngineStore((state) => state.openSelectedCountry);
   const resetView = useMapEngineStore((state) => state.resetView);
   const archiveIndex = useMemo(
-    () => new Map(mockCountryArchiveSummaries.map((entry) => [entry.countryCode, entry])),
+    () =>
+      new Map(
+        getCountryMapSummaries(mockVisitRecords, { themeName: "red" }).map((entry) => [
+          entry.countryCode,
+          entry,
+        ]),
+      ),
     [],
   );
   const countries = useMemo(() => loadWorldCountryRecords(), []);
@@ -62,8 +69,8 @@ export function MapExperience() {
               </h2>
               <p className="max-w-xl text-sm leading-6 text-stone-600">
                 {selectedCountry && selectedArchive
-                  ? `${selectedArchive.visitCount} visits, ${selectedArchive.photoCount} photos, and ${selectedArchive.postCount} posts are reflected by shared archive highlight data for this country.`
-                  : "Country tinting is coming from shared archive highlight data, while untouched countries stay near-white."}
+                  ? `${selectedArchive.visitCount} visits across ${selectedArchive.uniqueCityCount} cities are reflected by the shared archive and color layers for this country.`
+                  : "Country tinting is coming from the shared archive and color layers, while untouched countries stay near-white."}
               </p>
             </div>
 

@@ -6,10 +6,12 @@ import { useMemo, useRef, type RefObject } from "react";
 import { EdgesGeometry, ExtrudeGeometry, MathUtils, OrthographicCamera as ThreeOrthographicCamera, Shape } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
-import { mockCountryArchiveSummaries } from "@/lib/archive/mock-country-archive-summaries";
+import { mockVisitRecords } from "@/features/map/data/mock-visit-records";
 import { createCameraTarget, mergeBounds } from "@/features/map/lib/camera-targets";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import { useMapEngineStore } from "@/features/map/store/map-engine-store";
+import { getCountryMapSummaries } from "@/lib/archive";
+import { getTheme } from "@/lib/color-scale";
 
 function MapCameraRig({
   cameraRef,
@@ -139,8 +141,15 @@ function WorldContent() {
   const viewMode = useMapEngineStore((state) => state.viewMode);
   const resetView = useMapEngineStore((state) => state.resetView);
   const countries = useMemo(() => loadWorldCountryRecords(), []);
+  const theme = useMemo(() => getTheme("red"), []);
   const archiveIndex = useMemo(
-    () => new Map(mockCountryArchiveSummaries.map((entry) => [entry.countryCode, entry])),
+    () =>
+      new Map(
+        getCountryMapSummaries(mockVisitRecords, { themeName: "red" }).map((entry) => [
+          entry.countryCode,
+          entry,
+        ]),
+      ),
     [],
   );
   const worldBounds = useMemo(
@@ -182,7 +191,7 @@ function WorldContent() {
               ? archiveEntry
                 ? "#ead2ba"
                 : "#eeece6"
-              : archiveEntry?.baseFill ?? "#f7f5ef";
+              : archiveEntry?.fillColor ?? theme.emptyColor;
 
           return (
             <CountryShape
