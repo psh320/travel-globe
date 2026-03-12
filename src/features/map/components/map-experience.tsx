@@ -1,0 +1,83 @@
+"use client";
+
+import { useMemo } from "react";
+
+import { mockArchiveData } from "@/features/map/data/mock-archive-data";
+import { createArchiveIndex } from "@/features/map/lib/archive-intensity";
+import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
+import { WorldScene } from "@/features/map/components/world-scene";
+import { useMapEngineStore } from "@/features/map/store/map-engine-store";
+
+export function MapExperience() {
+  const selectedCountryName = useMapEngineStore((state) => state.selectedCountryName);
+  const viewMode = useMapEngineStore((state) => state.viewMode);
+  const openSelectedCountry = useMapEngineStore((state) => state.openSelectedCountry);
+  const resetView = useMapEngineStore((state) => state.resetView);
+  const archiveIndex = useMemo(() => createArchiveIndex(mockArchiveData), []);
+  const countries = useMemo(() => loadWorldCountryRecords(), []);
+  const selectedCountry = countries.find((country) => country.name === selectedCountryName) ?? null;
+  const selectedArchive = selectedCountryName ? archiveIndex.get(selectedCountryName) : null;
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      <section className="relative flex min-h-screen flex-col">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 px-4 pt-4 sm:px-6 sm:pt-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 rounded-[28px] border border-panel-border bg-panel/90 px-5 py-4 shadow-[0_18px_60px_rgba(80,65,42,0.08)] backdrop-blur md:flex-row md:items-end md:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.32em] text-stone-500">
+                Travel Globe
+              </p>
+              <h1 className="max-w-xl text-2xl font-semibold tracking-tight text-stone-800 sm:text-3xl">
+                Explore a calm 3D world view before later waves zoom into each archive.
+              </h1>
+            </div>
+            <p className="max-w-sm text-sm leading-6 text-stone-600">
+              Tap or click a country to select it. Press the same country again, or use the open
+              action below, to test the focus-ready camera transition.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1 pb-48 pt-28 sm:pb-40 sm:pt-36">
+          <WorldScene />
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4 sm:px-6 sm:pb-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 rounded-[28px] border border-panel-border bg-panel/92 p-4 shadow-[0_-8px_50px_rgba(80,65,42,0.08)] backdrop-blur sm:p-5 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.32em] text-stone-500">
+                {viewMode === "country" ? "Country Focus Foundation" : "World View"}
+              </p>
+              <h2 className="text-xl font-semibold text-stone-800">
+                {selectedCountry?.name ?? "No country selected"}
+              </h2>
+              <p className="max-w-xl text-sm leading-6 text-stone-600">
+                {selectedCountry && selectedArchive
+                  ? `${selectedArchive.visitCount} visits, ${selectedArchive.photoCount} photos, and ${selectedArchive.postCount} posts are driving the first-pass highlight intensity for this country.`
+                  : "Archive highlighting is connected to mock travel data. Countries with visits are tinted more warmly, while untouched countries stay near-white."}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                className="min-h-12 rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-45"
+                disabled={!selectedCountryName}
+                onClick={() => openSelectedCountry()}
+                type="button"
+              >
+                Open selected country
+              </button>
+              <button
+                className="min-h-12 rounded-full bg-stone-900 px-5 py-3 text-sm font-medium text-stone-50 transition hover:bg-stone-700"
+                onClick={() => resetView()}
+                type="button"
+              >
+                Return to world
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
