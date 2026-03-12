@@ -83,7 +83,7 @@ NEXT_PUBLIC_DEFAULT_THEME=red
 
 ### Supabase persistence setup
 
-This repository now includes the first persistence wave under [`supabase/migrations`](./supabase/migrations) and [`src/lib/supabase`](./src/lib/supabase).
+This repository now includes the first persistence wave under [`supabase/migrations`](./supabase/migrations) and [`src/lib/supabase`](./src/lib/supabase). Shared visit-domain types remain in [`src/lib/archive`](./src/lib/archive), and the Supabase layer adapts database rows into that shared surface instead of defining a competing archive contract.
 
 Apply the schema to your Supabase project with the Supabase CLI from the repository root:
 

@@ -1,22 +1,32 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
-  ArchiveVisit,
   PhotoAssetRecord,
-  TravelPostRecord,
+  PersistedPhotoAssetRow,
+  PersistedTravelPostRecord,
+  PersistedVisitRecord,
   VisitDraft,
+  VisitBundle,
   VisitLocationPatch,
-  VisitRecord,
-} from "@/types/archive";
+} from "@/lib/supabase/types";
+import {
+  toArchiveVisitRecord,
+  toPhotoAssetRecord,
+  type PhotoAssetUrlResolver,
+} from "@/lib/supabase/types";
 import type { Database } from "@/types/database";
 
 type DbClient = SupabaseClient<Database>;
-type VisitWithRelations = VisitRecord & {
-  photo_assets: PhotoAssetRecord[];
-  travel_posts: TravelPostRecord[];
+type VisitWithRelations = PersistedVisitRecord & {
+  photo_assets: PersistedPhotoAssetRow[];
+  travel_posts: PersistedTravelPostRecord[];
 };
 
-export async function listVisitsForUser(supabase: DbClient, userId: string) {
+export async function listVisitsForUser(
+  supabase: DbClient,
+  userId: string,
+  resolvePhotoUrl?: PhotoAssetUrlResolver,
+) {
   const { data, error } = await supabase
     .from("visits")
     .select("*, photo_assets(*), travel_posts(*)")
@@ -28,12 +38,19 @@ export async function listVisitsForUser(supabase: DbClient, userId: string) {
     throw error;
   }
 
-  return (data as VisitWithRelations[]).map(
-    ({ photo_assets, travel_posts, ...visit }): ArchiveVisit => ({
-      visit,
-      photos: photo_assets,
-      posts: travel_posts,
-    }),
+  return Promise.all(
+    (data as VisitWithRelations[]).map(
+      async ({ photo_assets, travel_posts, ...visit }): Promise<VisitBundle> => ({
+        visit: toArchiveVisitRecord(visit),
+        visitRow: visit,
+        photos: await Promise.all(
+          photo_assets.map((asset): Promise<PhotoAssetRecord> =>
+            toPhotoAssetRecord(asset, resolvePhotoUrl),
+          ),
+        ),
+        posts: travel_posts,
+      }),
+    ),
   );
 }
 

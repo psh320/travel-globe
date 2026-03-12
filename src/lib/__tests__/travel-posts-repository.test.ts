@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { createTravelPost } from "@/lib/supabase/repositories/travel-posts";
-import type { TravelPostRecord } from "@/types/archive";
+import type { PersistedTravelPostRecord } from "@/lib/supabase/types";
 
 describe("travel post repository", () => {
   it("persists city_name alongside the post payload", async () => {
     let insertedPayload: Record<string, unknown> | undefined;
 
-    const post: TravelPostRecord = {
+    const post: PersistedTravelPostRecord = {
       id: "post-1",
       user_id: "user-1",
       visit_id: "visit-1",

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { TravelPostDraft } from "@/lib/supabase/types";
 import type { Database } from "@/types/database";
-import type { TravelPostDraft } from "@/types/archive";
 
 type DbClient = SupabaseClient<Database>;
 

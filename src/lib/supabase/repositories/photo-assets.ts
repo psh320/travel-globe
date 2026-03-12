@@ -1,7 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { TRAVEL_PHOTOS_BUCKET } from "@/lib/supabase/constants";
-import type { PhotoAssetDraft } from "@/types/archive";
+import {
+  toPhotoAssetRecord,
+  type PhotoAssetDraft,
+  type PersistedPhotoAssetRow,
+  type PhotoAssetUrlResolver,
+} from "@/lib/supabase/types";
 import type { Database } from "@/types/database";
 
 type DbClient = SupabaseClient<Database>;
@@ -10,6 +15,7 @@ export async function createPhotoAsset(
   supabase: DbClient,
   userId: string,
   draft: PhotoAssetDraft,
+  resolvePublicUrl?: PhotoAssetUrlResolver,
 ) {
   const { data, error } = await supabase
     .from("photo_assets")
@@ -25,12 +31,13 @@ export async function createPhotoAsset(
     throw error;
   }
 
-  return data;
+  return toPhotoAssetRecord(data as PersistedPhotoAssetRow, resolvePublicUrl);
 }
 
 export async function listPhotoAssetsForVisit(
   supabase: DbClient,
   visitId: string,
+  resolvePublicUrl?: PhotoAssetUrlResolver,
 ) {
   const { data, error } = await supabase
     .from("photo_assets")
@@ -43,5 +50,9 @@ export async function listPhotoAssetsForVisit(
     throw error;
   }
 
-  return data;
+  return Promise.all(
+    (data as PersistedPhotoAssetRow[]).map((asset) =>
+      toPhotoAssetRecord(asset, resolvePublicUrl),
+    ),
+  );
 }
