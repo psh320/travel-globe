@@ -25,6 +25,7 @@ type ReadModelOptions = {
 export type PersistedArchiveReadModel = {
   entries: ArchiveVisitEntry[];
   visits: VisitRecord[];
+  visitDetails: ArchiveVisitDetail[];
   countrySummaries: WorldMapCountrySummary[];
 };
 
@@ -43,6 +44,7 @@ export function createPersistedArchiveReadModel(
   return {
     entries,
     visits: entries.map((entry) => entry.visit),
+    visitDetails,
     countrySummaries: getWorldMapCountrySummaries(entries, options),
   };
 }

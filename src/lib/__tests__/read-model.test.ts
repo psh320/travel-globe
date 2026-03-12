@@ -294,6 +294,7 @@ describe("persisted archive read model", () => {
         expect.objectContaining({ id: "visit-1", countryCode: "JP" }),
         expect.objectContaining({ id: "visit-2", countryCode: "JP" }),
       ],
+      visitDetails: details,
       countrySummaries: getPersistedWorldMapCountrySummaries(details, {
         themeName: "red",
       }),
