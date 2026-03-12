@@ -80,6 +80,47 @@ NEXT_PUBLIC_APP_NAME=Travel Globe
 NEXT_PUBLIC_DEFAULT_THEME=red
 ```
 
+### Supabase persistence setup
+
+This repository now includes the first persistence wave under [`supabase/migrations`](./supabase/migrations) and [`src/lib/supabase`](./src/lib/supabase).
+
+Apply the schema to your Supabase project with the Supabase CLI from the repository root:
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+The migration provisions:
+
+- `profiles` for user preferences
+- `visits` as the core durable archive entity
+- `photo_assets` for uploaded photo metadata and EXIF inference snapshots
+- `travel_posts` for text memories linked to visits
+- private `travel-photos` storage with folder-based RLS policies
+
+### Storage convention
+
+Uploaded photos should live in the private `travel-photos` bucket using this path shape:
+
+```text
+{userId}/{visitId}/{photoAssetId}/{sanitizedFileName}
+```
+
+This keeps object ownership aligned with row-level policies and lets the app derive signed URLs later without mixing UI state into persistence.
+
+### Auth/session notes
+
+- Browser, server, and admin Supabase clients are separated under [`src/lib/supabase/clients`](./src/lib/supabase/clients)
+- [`/middleware.ts`](./middleware.ts) refreshes auth session cookies for App Router requests
+- Server-only code that needs elevated access should use the service-role client sparingly and never expose that key to the browser
+
+### EXIF persistence model
+
+- `visits` stores the canonical location shown in the archive
+- `photo_assets` stores raw EXIF coordinates, inferred location fields, and confidence snapshots
+- Manual corrections should update the visit location and set `location_confidence` to `manual`, preserving the original inference snapshot on the photo asset
+
 ---
 
 ## Core product flow

@@ -15,10 +15,10 @@
 
 ## Phase 2 - Persistence and archive flow
 
-- [ ] Configure Supabase client setup
+- [x] Configure Supabase client setup
 - [ ] Add Supabase auth flow
-- [ ] Define schema for users, visits, photo_assets, and travel_posts
-- [ ] Configure Supabase Storage for images
+- [x] Define schema for users, visits, photo_assets, and travel_posts
+- [x] Configure Supabase Storage for images
 - [ ] Build photo upload UI
 - [ ] Parse EXIF metadata on upload
 - [ ] Add manual location correction flow
