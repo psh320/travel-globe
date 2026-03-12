@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  createArchiveIndex,
+  createCountryArchiveIndex,
   getMaxVisitCount,
   getRelativeIntensity,
-} from "@/features/map/lib/archive-intensity";
+} from "@/lib/color-scale/country-color-scale";
 
 const archiveData = [
-  { countryName: "Japan", visitCount: 8, photoCount: 40, postCount: 4 },
-  { countryName: "France", visitCount: 2, photoCount: 12, postCount: 1 },
+  { countryCode: "392", visitCount: 8, photoCount: 40, postCount: 4 },
+  { countryCode: "250", visitCount: 2, photoCount: 12, postCount: 1 },
 ];
 
 describe("archive intensity helpers", () => {
-  it("indexes country summaries by country name", () => {
-    const archiveIndex = createArchiveIndex(archiveData);
+  it("indexes country summaries by country code", () => {
+    const archiveIndex = createCountryArchiveIndex(archiveData);
 
-    expect(archiveIndex.get("Japan")?.photoCount).toBe(40);
-    expect(archiveIndex.get("France")?.visitCount).toBe(2);
+    expect(archiveIndex.get("392")?.photoCount).toBe(40);
+    expect(archiveIndex.get("250")?.visitCount).toBe(2);
   });
 
   it("finds the strongest visit count for scaling", () => {

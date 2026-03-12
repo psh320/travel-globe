@@ -11,16 +11,9 @@ export type CameraTarget = {
   zoom: number;
 };
 
-export type ArchiveSummary = {
-  countryName: string;
-  visitCount: number;
-  photoCount: number;
-  postCount: number;
-};
-
 export type WorldCountryRecord = {
-  id: string;
-  name: string;
+  countryCode: string;
+  displayName: string;
   bounds: Bounds2D;
   centroid: [number, number];
   path: string;

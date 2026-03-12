@@ -6,13 +6,13 @@ import { useMemo, useRef, type RefObject } from "react";
 import { EdgesGeometry, ExtrudeGeometry, MathUtils, OrthographicCamera as ThreeOrthographicCamera, Shape } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
-import { mockArchiveData } from "@/features/map/data/mock-archive-data";
+import { mockCountryArchiveSummaries } from "@/lib/archive/mock-country-archive-summaries";
 import {
-  createArchiveIndex,
+  createCountryArchiveIndex,
   getCountryFill,
   getMaxVisitCount,
   getRelativeIntensity,
-} from "@/features/map/lib/archive-intensity";
+} from "@/lib/color-scale/country-color-scale";
 import { createCameraTarget, mergeBounds } from "@/features/map/lib/camera-targets";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import { useMapEngineStore } from "@/features/map/store/map-engine-store";
@@ -46,17 +46,17 @@ function MapCameraRig({
 }
 
 function CountryShape({
-  countryName,
+  countryCode,
   path,
   fill,
   zOffset,
 }: {
-  countryName: string;
+  countryCode: string;
   path: string;
   fill: string;
   zOffset: number;
 }) {
-  const setHoveredCountryName = useMapEngineStore((state) => state.setHoveredCountryName);
+  const setHoveredCountryCode = useMapEngineStore((state) => state.setHoveredCountryCode);
   const pressCountry = useMapEngineStore((state) => state.pressCountry);
   const shapes = useMemo(() => {
     const { paths } = new SVGLoader().parse(
@@ -70,12 +70,12 @@ function CountryShape({
     <group>
       {shapes.map((shape, shapeIndex) => (
         <CountrySurface
-          key={`${countryName}-${shapeIndex}`}
-          countryName={countryName}
+          key={`${countryCode}-${shapeIndex}`}
+          countryCode={countryCode}
           shape={shape}
           fill={fill}
           zOffset={zOffset}
-          onHoverChange={setHoveredCountryName}
+          onHoverChange={setHoveredCountryCode}
           onPress={pressCountry}
         />
       ))}
@@ -84,19 +84,19 @@ function CountryShape({
 }
 
 function CountrySurface({
-  countryName,
+  countryCode,
   shape,
   fill,
   zOffset,
   onHoverChange,
   onPress,
 }: {
-  countryName: string;
+  countryCode: string;
   shape: Shape;
   fill: string;
   zOffset: number;
-  onHoverChange: (countryName: string | null) => void;
-  onPress: (countryName: string) => void;
+  onHoverChange: (countryCode: string | null) => void;
+  onPress: (countryCode: string) => void;
 }) {
   const geometry = useMemo(
     () =>
@@ -117,11 +117,11 @@ function CountrySurface({
         geometry={geometry}
         onPointerDown={(event) => {
           event.stopPropagation();
-          onPress(countryName);
+          onPress(countryCode);
         }}
         onPointerEnter={(event) => {
           event.stopPropagation();
-          onHoverChange(countryName);
+          onHoverChange(countryCode);
         }}
         onPointerLeave={(event) => {
           event.stopPropagation();
@@ -140,18 +140,18 @@ function CountrySurface({
 function WorldContent() {
   const { size } = useThree();
   const cameraRef = useRef<ThreeOrthographicCamera | null>(null);
-  const hoveredCountryName = useMapEngineStore((state) => state.hoveredCountryName);
-  const selectedCountryName = useMapEngineStore((state) => state.selectedCountryName);
+  const hoveredCountryCode = useMapEngineStore((state) => state.hoveredCountryCode);
+  const selectedCountryCode = useMapEngineStore((state) => state.selectedCountryCode);
   const viewMode = useMapEngineStore((state) => state.viewMode);
   const resetView = useMapEngineStore((state) => state.resetView);
   const countries = useMemo(() => loadWorldCountryRecords(), []);
-  const archiveIndex = useMemo(() => createArchiveIndex(mockArchiveData), []);
-  const maxVisitCount = useMemo(() => getMaxVisitCount(mockArchiveData), []);
+  const archiveIndex = useMemo(() => createCountryArchiveIndex(mockCountryArchiveSummaries), []);
+  const maxVisitCount = useMemo(() => getMaxVisitCount(mockCountryArchiveSummaries), []);
   const worldBounds = useMemo(
     () => mergeBounds(countries.map((country) => country.bounds)),
     [countries],
   );
-  const selectedCountry = countries.find((country) => country.name === selectedCountryName);
+  const selectedCountry = countries.find((country) => country.countryCode === selectedCountryCode);
   const target = selectedCountry && viewMode === "country"
     ? createCameraTarget(selectedCountry.bounds, size, 16)
     : createCameraTarget(worldBounds, size, 20);
@@ -177,15 +177,15 @@ function WorldContent() {
       </group>
       <group position={[0, 0, -0.35]}>
         {countries.map((country) => {
-          const archiveEntry = archiveIndex.get(country.name);
+          const archiveEntry = archiveIndex.get(country.countryCode);
           const intensity = getRelativeIntensity(archiveEntry?.visitCount ?? 0, maxVisitCount);
-          const isHovered = hoveredCountryName === country.name;
-          const isSelected = selectedCountryName === country.name;
+          const isHovered = hoveredCountryCode === country.countryCode;
+          const isSelected = selectedCountryCode === country.countryCode;
 
           return (
             <CountryShape
-              key={country.id}
-              countryName={country.name}
+              key={country.countryCode}
+              countryCode={country.countryCode}
               path={country.path}
               fill={getCountryFill({ intensity, isHovered, isSelected })}
               zOffset={isSelected ? 0.42 : isHovered ? 0.16 : 0}

@@ -1,10 +1,10 @@
-import type { ArchiveSummary } from "@/features/map/types";
+import type { CountryArchiveSummary } from "@/lib/archive/mock-country-archive-summaries";
 
-export function createArchiveIndex(archiveData: ArchiveSummary[]) {
-  return new Map(archiveData.map((entry) => [entry.countryName, entry]));
+export function createCountryArchiveIndex(archiveData: CountryArchiveSummary[]) {
+  return new Map(archiveData.map((entry) => [entry.countryCode, entry]));
 }
 
-export function getMaxVisitCount(archiveData: ArchiveSummary[]) {
+export function getMaxVisitCount(archiveData: CountryArchiveSummary[]) {
   return archiveData.reduce((maxCount, entry) => Math.max(maxCount, entry.visitCount), 0);
 }
 

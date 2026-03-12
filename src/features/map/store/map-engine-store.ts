@@ -5,35 +5,35 @@ import { create } from "zustand";
 import type { MapViewMode } from "@/features/map/types";
 
 type MapEngineState = {
-  hoveredCountryName: string | null;
-  selectedCountryName: string | null;
+  hoveredCountryCode: string | null;
+  selectedCountryCode: string | null;
   viewMode: MapViewMode;
-  setHoveredCountryName: (countryName: string | null) => void;
-  pressCountry: (countryName: string) => void;
+  setHoveredCountryCode: (countryCode: string | null) => void;
+  pressCountry: (countryCode: string) => void;
   openSelectedCountry: () => void;
   resetView: () => void;
 };
 
 export const useMapEngineStore = create<MapEngineState>((set, get) => ({
-  hoveredCountryName: null,
-  selectedCountryName: null,
+  hoveredCountryCode: null,
+  selectedCountryCode: null,
   viewMode: "world",
-  setHoveredCountryName: (hoveredCountryName) => set({ hoveredCountryName }),
-  pressCountry: (countryName) => {
-    const { selectedCountryName, viewMode } = get();
+  setHoveredCountryCode: (hoveredCountryCode) => set({ hoveredCountryCode }),
+  pressCountry: (countryCode) => {
+    const { selectedCountryCode, viewMode } = get();
 
-    if (selectedCountryName === countryName) {
+    if (selectedCountryCode === countryCode) {
       set({ viewMode: viewMode === "world" ? "country" : "world" });
       return;
     }
 
     set({
-      selectedCountryName: countryName,
+      selectedCountryCode: countryCode,
       viewMode: "world",
     });
   },
   openSelectedCountry: () => {
-    if (!get().selectedCountryName) {
+    if (!get().selectedCountryCode) {
       return;
     }
 
@@ -41,8 +41,8 @@ export const useMapEngineStore = create<MapEngineState>((set, get) => ({
   },
   resetView: () =>
     set({
-      hoveredCountryName: null,
-      selectedCountryName: null,
+      hoveredCountryCode: null,
+      selectedCountryCode: null,
       viewMode: "world",
     }),
 }));

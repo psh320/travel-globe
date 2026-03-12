@@ -74,8 +74,8 @@ export function loadWorldCountryRecords() {
       const bounds = getPathBounds(path);
 
       return {
-        id: country.id,
-        name: country.properties.name,
+        countryCode: country.id,
+        displayName: country.properties.name,
         bounds,
         centroid: [
           (bounds.minX + bounds.maxX) / 2,
