@@ -100,6 +100,7 @@ create table if not exists public.travel_posts (
   title text,
   content text not null,
   country_code text not null,
+  city_name text,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint travel_posts_country_code_format check (country_code ~ '^[A-Z]{2}$')

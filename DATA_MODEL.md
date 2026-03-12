@@ -35,14 +35,16 @@ A Visit is the central entity in the system.
 - id
 - user_id
 - visit_id
+- storage_bucket
 - storage_path
-- public_url
 - exif_latitude
 - exif_longitude
 - exif_captured_at
 - inferred_country_code
 - inferred_city_name
 - created_at
+
+Photo URLs should be derived from storage metadata at read time, not stored as durable source-of-truth fields.
 
 ### travel_posts
 

@@ -75,6 +75,7 @@ Copy `.env.example` to `.env.local` and fill in:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_ENABLE_SUPABASE_AUTH_MIDDLEWARE=false
 
 NEXT_PUBLIC_APP_NAME=Travel Globe
 NEXT_PUBLIC_DEFAULT_THEME=red
@@ -112,13 +113,14 @@ This keeps object ownership aligned with row-level policies and lets the app der
 ### Auth/session notes
 
 - Browser, server, and admin Supabase clients are separated under [`src/lib/supabase/clients`](./src/lib/supabase/clients)
-- [`/middleware.ts`](./middleware.ts) refreshes auth session cookies for App Router requests
+- [`/middleware.ts`](./middleware.ts) is opt-in and only refreshes auth session cookies when `NEXT_PUBLIC_ENABLE_SUPABASE_AUTH_MIDDLEWARE=true`
 - Server-only code that needs elevated access should use the service-role client sparingly and never expose that key to the browser
 
 ### EXIF persistence model
 
 - `visits` stores the canonical location shown in the archive
 - `photo_assets` stores raw EXIF coordinates, inferred location fields, and confidence snapshots
+- signed or public photo URLs should be derived from `storage_bucket` + `storage_path` at read time, not stored as durable source-of-truth fields
 - Manual corrections should update the visit location and set `location_confidence` to `manual`, preserving the original inference snapshot on the photo asset
 
 ---

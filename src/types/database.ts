@@ -122,6 +122,7 @@ export type Database = {
       };
       travel_posts: {
         Row: {
+          city_name: string | null;
           content: string;
           country_code: string;
           created_at: string;
@@ -132,6 +133,7 @@ export type Database = {
           visit_id: string;
         };
         Insert: {
+          city_name?: string | null;
           content: string;
           country_code: string;
           created_at?: string;
@@ -142,6 +144,7 @@ export type Database = {
           visit_id: string;
         };
         Update: {
+          city_name?: string | null;
           content?: string;
           country_code?: string;
           created_at?: string;

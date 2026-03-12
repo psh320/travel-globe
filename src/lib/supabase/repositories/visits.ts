@@ -1,9 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
+  ArchiveVisit,
   PhotoAssetRecord,
   TravelPostRecord,
-  VisitAggregate,
   VisitDraft,
   VisitLocationPatch,
   VisitRecord,
@@ -29,7 +29,7 @@ export async function listVisitsForUser(supabase: DbClient, userId: string) {
   }
 
   return (data as VisitWithRelations[]).map(
-    ({ photo_assets, travel_posts, ...visit }): VisitAggregate => ({
+    ({ photo_assets, travel_posts, ...visit }): ArchiveVisit => ({
       visit,
       photos: photo_assets,
       posts: travel_posts,

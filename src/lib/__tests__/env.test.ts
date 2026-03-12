@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   getOptionalAppEnv,
+  getOptionalSupabaseBrowserEnv,
   getSupabaseBrowserEnv,
   getSupabaseServerEnv,
+  isSupabaseAuthMiddlewareEnabled,
 } from "@/lib/env";
 
 const ORIGINAL_ENV = { ...process.env };
@@ -46,5 +48,14 @@ describe("env helpers", () => {
       appName: "Travel Globe",
       defaultTheme: "red",
     });
+  });
+
+  it("supports fail-soft reads before wave 2 auth setup is active", () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_ENABLE_SUPABASE_AUTH_MIDDLEWARE;
+
+    expect(getOptionalSupabaseBrowserEnv()).toBeNull();
+    expect(isSupabaseAuthMiddlewareEnabled()).toBe(false);
   });
 });

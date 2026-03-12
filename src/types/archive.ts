@@ -54,7 +54,7 @@ export type PhotoAssetDraft = Pick<
 
 export type TravelPostDraft = Pick<
   TravelPostRecord,
-  "visit_id" | "title" | "content" | "country_code"
+  "visit_id" | "title" | "content" | "country_code" | "city_name"
 > & {
   id?: string;
 };
@@ -72,8 +72,10 @@ export type ExifLocationSnapshot = {
   metadata: Json;
 };
 
-export type VisitAggregate = {
+export type ArchiveVisit = {
   visit: VisitRecord;
   photos: PhotoAssetRecord[];
   posts: TravelPostRecord[];
 };
+
+export type VisitAggregate = ArchiveVisit;

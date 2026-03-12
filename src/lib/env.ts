@@ -15,18 +15,51 @@ function readEnv(name: string): string {
   return value;
 }
 
-export function getSupabaseBrowserEnv() {
+function readOptionalEnv(name: string) {
+  return process.env[name] || null;
+}
+
+export function getOptionalSupabaseBrowserEnv() {
+  const url = readOptionalEnv(requiredClientEnv[0]);
+  const anonKey = readOptionalEnv(requiredClientEnv[1]);
+
+  if (!url || !anonKey) {
+    return null;
+  }
+
+  return { url, anonKey };
+}
+
+export function getOptionalSupabaseServerEnv() {
+  const browserEnv = getOptionalSupabaseBrowserEnv();
+  const serviceRoleKey = readOptionalEnv(requiredServerEnv[2]);
+
+  if (!browserEnv || !serviceRoleKey) {
+    return null;
+  }
+
   return {
-    url: readEnv(requiredClientEnv[0]),
-    anonKey: readEnv(requiredClientEnv[1]),
+    ...browserEnv,
+    serviceRoleKey,
   };
 }
 
+export function getSupabaseBrowserEnv() {
+  return (
+    getOptionalSupabaseBrowserEnv() ?? {
+      url: readEnv(requiredClientEnv[0]),
+      anonKey: readEnv(requiredClientEnv[1]),
+    }
+  );
+}
+
 export function getSupabaseServerEnv() {
-  return {
-    ...getSupabaseBrowserEnv(),
-    serviceRoleKey: readEnv(requiredServerEnv[2]),
-  };
+  return (
+    getOptionalSupabaseServerEnv() ?? {
+      ...getSupabaseBrowserEnv(),
+      serviceRoleKey: readEnv(requiredServerEnv[2]),
+    }
+  );
 }
 
 export function getOptionalAppEnv() {
@@ -34,4 +67,8 @@ export function getOptionalAppEnv() {
     appName: process.env.NEXT_PUBLIC_APP_NAME ?? "Travel Globe",
     defaultTheme: process.env.NEXT_PUBLIC_DEFAULT_THEME ?? "red",
   };
+}
+
+export function isSupabaseAuthMiddlewareEnabled() {
+  return process.env.NEXT_PUBLIC_ENABLE_SUPABASE_AUTH_MIDDLEWARE === "true";
 }
