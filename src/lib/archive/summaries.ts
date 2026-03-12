@@ -71,10 +71,6 @@ export function getCountrySummaries(visits: VisitRecord[]): CountrySummary[] {
         existing.textVisitCount += 1;
       }
 
-      if (visit.cityName) {
-        existing.uniqueCityCount += 0;
-      }
-
       continue;
     }
 

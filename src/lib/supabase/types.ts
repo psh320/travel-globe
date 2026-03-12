@@ -1,4 +1,8 @@
-import { normalizeVisit, type VisitRecord } from "@/lib/archive";
+import {
+  normalizeVisit,
+  type ArchiveVisitEntry,
+  type VisitRecord,
+} from "@/lib/archive";
 import type { Json, Row } from "@/types/database";
 
 export type ProfileRecord = Row<"profiles">;
@@ -69,19 +73,51 @@ export type ExifLocationSnapshot = {
   metadata: Json;
 };
 
-export type PhotoAssetRecord = PersistedPhotoAssetRow & {
-  public_url: string | null;
+export type ArchivePhotoAsset = {
+  id: string;
+  userId: string;
+  visitId: string;
+  storageBucket: string;
+  storagePath: string;
+  fileName: string;
+  mimeType: string | null;
+  fileSizeBytes: number | null;
+  capturedAt: string | null;
+  exifLatitude: number | null;
+  exifLongitude: number | null;
+  inferredCountryCode: string | null;
+  inferredCountryName: string | null;
+  inferredCityName: string | null;
+  inferredLatitude: number | null;
+  inferredLongitude: number | null;
+  inferredLocationConfidence: PersistedPhotoAssetRow["inferred_location_confidence"];
+  metadata: Json;
+  publicUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PhotoAssetUrlResolver = (
   asset: PersistedPhotoAssetRow,
 ) => Promise<string | null> | string | null;
 
-export type VisitBundle = {
+export type ArchiveTravelPost = {
+  id: string;
+  userId: string;
+  visitId: string;
+  title: string | null;
+  content: string;
+  countryCode: string;
+  cityName: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ArchiveVisitDetail = {
   visit: VisitRecord;
   visitRow: PersistedVisitRecord;
-  photos: PhotoAssetRecord[];
-  posts: PersistedTravelPostRecord[];
+  photos: ArchivePhotoAsset[];
+  posts: ArchiveTravelPost[];
 };
 
 export function toArchiveVisitRecord(
@@ -103,14 +139,65 @@ export function toArchiveVisitRecord(
   });
 }
 
-export async function toPhotoAssetRecord(
+export function toArchiveVisitEntry(
+  visitDetail: ArchiveVisitDetail,
+): ArchiveVisitEntry {
+  return {
+    visit: normalizeVisit(visitDetail.visit),
+    photoAssetCount: visitDetail.photos.length,
+    travelPostCount: visitDetail.posts.length,
+  };
+}
+
+export function toArchiveVisitEntries(
+  visitDetails: ArchiveVisitDetail[],
+): ArchiveVisitEntry[] {
+  return visitDetails.map(toArchiveVisitEntry);
+}
+
+export async function toArchivePhotoAsset(
   asset: PersistedPhotoAssetRow,
   resolvePublicUrl?: PhotoAssetUrlResolver,
-): Promise<PhotoAssetRecord> {
+): Promise<ArchivePhotoAsset> {
   const publicUrl = resolvePublicUrl ? await resolvePublicUrl(asset) : null;
 
   return {
-    ...asset,
-    public_url: publicUrl,
+    id: asset.id,
+    userId: asset.user_id,
+    visitId: asset.visit_id,
+    storageBucket: asset.storage_bucket,
+    storagePath: asset.storage_path,
+    fileName: asset.file_name,
+    mimeType: asset.mime_type,
+    fileSizeBytes: asset.file_size_bytes,
+    capturedAt: asset.captured_at,
+    exifLatitude: asset.exif_latitude,
+    exifLongitude: asset.exif_longitude,
+    inferredCountryCode: asset.inferred_country_code,
+    inferredCountryName: asset.inferred_country_name,
+    inferredCityName: asset.inferred_city_name,
+    inferredLatitude: asset.inferred_latitude,
+    inferredLongitude: asset.inferred_longitude,
+    inferredLocationConfidence: asset.inferred_location_confidence,
+    metadata: asset.metadata,
+    publicUrl,
+    createdAt: asset.created_at,
+    updatedAt: asset.updated_at,
+  };
+}
+
+export function toArchiveTravelPost(
+  post: PersistedTravelPostRecord,
+): ArchiveTravelPost {
+  return {
+    id: post.id,
+    userId: post.user_id,
+    visitId: post.visit_id,
+    title: post.title,
+    content: post.content,
+    countryCode: post.country_code,
+    cityName: post.city_name,
+    createdAt: post.created_at,
+    updatedAt: post.updated_at,
   };
 }

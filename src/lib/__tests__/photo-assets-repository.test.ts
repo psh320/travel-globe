@@ -64,7 +64,9 @@ describe("photo assets repository", () => {
     expect(result).toEqual([
       expect.objectContaining({
         id: "asset-1",
-        public_url: "https://example.test/user-1/visit-1/asset-1/photo.jpg",
+        publicUrl: "https://example.test/user-1/visit-1/asset-1/photo.jpg",
+        storagePath: "user-1/visit-1/asset-1/photo.jpg",
+        inferredCountryCode: "JP",
       }),
     ]);
   });

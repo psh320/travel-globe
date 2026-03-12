@@ -2,7 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { TRAVEL_PHOTOS_BUCKET } from "@/lib/supabase/constants";
 import {
-  toPhotoAssetRecord,
+  toArchivePhotoAsset,
+  type ArchivePhotoAsset,
   type PhotoAssetDraft,
   type PersistedPhotoAssetRow,
   type PhotoAssetUrlResolver,
@@ -16,7 +17,7 @@ export async function createPhotoAsset(
   userId: string,
   draft: PhotoAssetDraft,
   resolvePublicUrl?: PhotoAssetUrlResolver,
-) {
+): Promise<ArchivePhotoAsset> {
   const { data, error } = await supabase
     .from("photo_assets")
     .insert({
@@ -31,14 +32,17 @@ export async function createPhotoAsset(
     throw error;
   }
 
-  return toPhotoAssetRecord(data as PersistedPhotoAssetRow, resolvePublicUrl);
+  return toArchivePhotoAsset(
+    data as PersistedPhotoAssetRow,
+    resolvePublicUrl,
+  );
 }
 
 export async function listPhotoAssetsForVisit(
   supabase: DbClient,
   visitId: string,
   resolvePublicUrl?: PhotoAssetUrlResolver,
-) {
+): Promise<ArchivePhotoAsset[]> {
   const { data, error } = await supabase
     .from("photo_assets")
     .select("*")
@@ -52,7 +56,7 @@ export async function listPhotoAssetsForVisit(
 
   return Promise.all(
     (data as PersistedPhotoAssetRow[]).map((asset) =>
-      toPhotoAssetRecord(asset, resolvePublicUrl),
+      toArchivePhotoAsset(asset, resolvePublicUrl),
     ),
   );
 }

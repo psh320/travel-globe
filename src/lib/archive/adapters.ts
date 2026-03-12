@@ -1,60 +1,34 @@
-import { getCountrySummaries, getCitySummaries } from "@/lib/archive/summaries";
+import {
+  createArchiveVisitEntries,
+  getCityGroupingSummaries,
+  getWorldMapCountrySummaries,
+  type MapSummaryOptions,
+} from "@/lib/archive/selectors";
 import type {
   CityMapSummary,
   CountryMapSummary,
-  IntensitySummary,
   VisitRecord,
 } from "@/lib/archive/types";
-import {
-  applyThemeIntensity,
-  calculateRelativeIntensity,
-  getIntensityBucket,
-} from "@/lib/color-scale/intensity";
-import { getThemeColor, getThemeBucketCount } from "@/lib/color-scale/themes";
-
-export interface MapSummaryOptions {
-  themeName?: string | null;
-}
-
-function createIntensitySummary(
-  count: number,
-  maxCount: number,
-  themeName?: string | null,
-): IntensitySummary {
-  const normalizedIntensity = calculateRelativeIntensity(count, maxCount);
-  const themedIntensity = applyThemeIntensity(normalizedIntensity, themeName);
-  const intensityBucket = getIntensityBucket(
-    themedIntensity,
-    getThemeBucketCount(themeName),
-  );
-
-  return {
-    normalizedIntensity,
-    themedIntensity,
-    intensityBucket,
-  };
-}
 
 export function getCountryMapSummaries(
   visits: VisitRecord[],
   options: MapSummaryOptions = {},
 ): CountryMapSummary[] {
-  const countrySummaries = getCountrySummaries(visits);
-  const maxVisitCount = Math.max(0, ...countrySummaries.map((summary) => summary.visitCount));
-
-  return countrySummaries.map((summary) => {
-    const intensity = createIntensitySummary(
-      summary.visitCount,
-      maxVisitCount,
-      options.themeName,
-    );
-
-    return {
-      ...summary,
-      ...intensity,
-      fillColor: getThemeColor(options.themeName, intensity.intensityBucket),
-    };
-  });
+  return getWorldMapCountrySummaries(createArchiveVisitEntries(visits), options).map(
+    (summary) => ({
+      countryCode: summary.countryCode,
+      countryName: summary.countryName,
+      visitCount: summary.visitCount,
+      photoVisitCount: summary.photoVisitCount,
+      textVisitCount: summary.textVisitCount,
+      uniqueCityCount: summary.uniqueCityCount,
+      lastVisitedAt: summary.lastVisitedAt,
+      normalizedIntensity: summary.normalizedIntensity,
+      themedIntensity: summary.themedIntensity,
+      intensityBucket: summary.intensityBucket,
+      fillColor: summary.fillColor,
+    }),
+  );
 }
 
 export function getCityMapSummaries(
@@ -62,20 +36,21 @@ export function getCityMapSummaries(
   countryCode?: string | null,
   options: MapSummaryOptions = {},
 ): CityMapSummary[] {
-  const citySummaries = getCitySummaries(visits, countryCode);
-  const maxVisitCount = Math.max(0, ...citySummaries.map((summary) => summary.visitCount));
-
-  return citySummaries.map((summary) => {
-    const intensity = createIntensitySummary(
-      summary.visitCount,
-      maxVisitCount,
-      options.themeName,
-    );
-
-    return {
-      ...summary,
-      ...intensity,
-      fillColor: getThemeColor(options.themeName, intensity.intensityBucket),
-    };
-  });
+  return getCityGroupingSummaries(
+    createArchiveVisitEntries(visits),
+    countryCode,
+    options,
+  ).map((summary) => ({
+    countryCode: summary.countryCode,
+    countryName: summary.countryName,
+    cityName: summary.cityName,
+    visitCount: summary.visitCount,
+    photoVisitCount: summary.photoVisitCount,
+    textVisitCount: summary.textVisitCount,
+    lastVisitedAt: summary.lastVisitedAt,
+    normalizedIntensity: summary.normalizedIntensity,
+    themedIntensity: summary.themedIntensity,
+    intensityBucket: summary.intensityBucket,
+    fillColor: summary.fillColor,
+  }));
 }

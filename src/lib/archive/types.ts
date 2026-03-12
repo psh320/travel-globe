@@ -17,6 +17,12 @@ export interface VisitRecord {
   updatedAt?: string | null;
 }
 
+export interface ArchiveVisitEntry {
+  visit: VisitRecord;
+  photoAssetCount: number;
+  travelPostCount: number;
+}
+
 export interface ArchiveCounts {
   totalVisits: number;
   countriesVisited: number;
@@ -59,4 +65,25 @@ export interface CountryMapSummary extends CountrySummary, IntensitySummary {
 
 export interface CityMapSummary extends CitySummary, IntensitySummary {
   fillColor: string;
+}
+
+export interface WorldMapCountrySummary extends CountryMapSummary {
+  photoAssetCount: number;
+  travelPostCount: number;
+}
+
+export interface CityGroupSummary extends CityMapSummary {
+  photoAssetCount: number;
+  travelPostCount: number;
+  visitIds: string[];
+}
+
+export interface CountryDetailSummary {
+  countryCode: string;
+  countryName: string;
+  countrySummary: WorldMapCountrySummary;
+  archiveCounts: ArchiveCounts;
+  cityGroups: CityGroupSummary[];
+  photoAssetCount: number;
+  travelPostCount: number;
 }

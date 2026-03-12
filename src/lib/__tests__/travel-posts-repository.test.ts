@@ -55,6 +55,7 @@ describe("travel post repository", () => {
       visit_id: "visit-1",
       city_name: "Hong Kong",
     });
-    expect(result.city_name).toBe("Hong Kong");
+    expect(result.cityName).toBe("Hong Kong");
+    expect(result.countryCode).toBe("HK");
   });
 });
