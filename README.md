@@ -122,6 +122,7 @@ This keeps object ownership aligned with row-level policies and lets the app der
 - `photo_assets` stores raw EXIF coordinates, inferred location fields, and confidence snapshots
 - signed or public photo URLs should be derived from `storage_bucket` + `storage_path` at read time, not stored as durable source-of-truth fields
 - Manual corrections should update the visit location and set `location_confidence` to `manual`, preserving the original inference snapshot on the photo asset
+- The current create flow performs best-effort EXIF extraction for capture date and GPS coordinates, while country/city remain manually confirmable before save
 
 ---
 
@@ -131,12 +132,14 @@ This keeps object ownership aligned with row-level policies and lets the app der
 2. Visited countries are colored by travel archive intensity.
 3. User uploads photos or adds travel posts; EXIF is used to infer location when possible.
 4. Tapping a country opens the detail view with cities and travel memories.
+5. The upload tab can save a photo visit or text memory and refresh the archive view after success.
 
 The current integrated shell now:
 
 - renders persisted archive intensity on the world map when a session is available
 - opens a mobile-first country detail sheet with real stats and city grouping
 - shows recent saved memories and top-country summaries in the archive panel
+- supports saving photo visits and text memories from the upload tab
 - falls back to mock archive data when persisted user data is unavailable
 
 ---
@@ -183,8 +186,9 @@ Work is organized in **waves**. The repository has already completed:
 - Wave 2: persistence/read-model integration
 - Wave 3: focus mode and country detail foundation
 - Wave 4: archive UX hardening
+- Wave 5: archive creation flow
 
-The next implementation wave is the real archive creation flow: photo upload, EXIF-assisted inference, manual correction, and save-back into the integrated map/detail experience.
+The next implementation wave is polish and hardening: stronger inference, smoother motion, rendering/performance tuning, and e2e coverage for the primary journey.
 
 ---
 

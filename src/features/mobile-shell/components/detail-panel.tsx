@@ -1,6 +1,7 @@
 import type { CountryDetailSummary } from "@/lib/archive";
 
 import type { DetailListCard, DetailStat, MobileSelectedCountry, PanelTab } from "../types";
+import { ArchiveCreateForm } from "./archive-create-form";
 
 type DetailPanelProps = {
   activeTab: PanelTab;
@@ -185,23 +186,28 @@ export function DetailPanel({
         <div className="mt-4 space-y-3">
           <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-[#f7f4ee] p-4">
             <p className="text-sm font-semibold text-[#172126]">
-              Upload flow next
+              Create archive entry
             </p>
             <p className="mt-2 text-sm text-[#5f6d72]">
-              Wave 4 keeps the shell ready for photo upload, EXIF review, and
-              manual correction while the real create flow lands next.
+              Save a photo memory or text note, confirm the place, and let the map refresh
+              after the entry is written.
             </p>
-            <div className="mt-3 rounded-[1.25rem] border border-dashed border-[rgba(23,33,38,0.1)] bg-white px-4 py-6 text-sm text-[#5f6d72]">
-              Upload from camera roll, then confirm country and city before save.
+            <div className="mt-4">
+              <ArchiveCreateForm
+                defaultCityName={null}
+                defaultCountryCode={selectedCountry?.countryCode}
+                defaultCountryName={selectedCountry?.displayName}
+                onSaved={() => onSwitchTab("archive")}
+              />
             </div>
           </article>
           <article className="rounded-[1.5rem] border border-[rgba(23,33,38,0.1)] bg-white p-4">
             <p className="text-sm font-semibold text-[#172126]">
-              Add text entry
+              Manual confirmation
             </p>
             <p className="mt-2 text-sm text-[#5f6d72]">
-              Manual place selection can be attached by upstream map/data flows
-              without changing the shell structure.
+              Country and city stay editable, so missing EXIF or low-confidence location data
+              never blocks saving a memory.
             </p>
           </article>
         </div>

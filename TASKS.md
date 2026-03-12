@@ -10,6 +10,7 @@
   - Wave 1 foundation shell: complete
   - Wave 2 persistence/read-model integration: complete
   - Wave 3 focus mode and country detail foundation: complete
+  - Wave 4 archive UX hardening: complete
 
 ## Completed wave - Wave 1 foundation shell
 
@@ -54,7 +55,7 @@ Ship a mergeable foundation slice that replaces the starter app with a Travel Gl
 - [ ] Reveal city-level boundaries where data is available
 - [ ] Build richer photo/post gallery views
 
-## Current wave - Wave 4 archive UX hardening
+## Completed wave - Wave 4 archive UX hardening
 
 ### Objective
 
@@ -72,15 +73,25 @@ Replace placeholder shell content with real persisted archive browsing and count
 - [x] `npm run test`
 - [x] `npm run build`
 
-## Next wave - Wave 5 archive creation flow
+## Current wave - Wave 5 archive creation flow
 
-- [ ] Build photo upload UI with visible progress, success, and failure states
-- [ ] Add text-entry creation flow
-- [ ] Parse EXIF metadata on selected photos
-- [ ] Infer country/city when practical and show confidence clearly
-- [ ] Allow manual country/city correction before save
-- [ ] Persist visits, photo assets, and travel posts from the create flow
-- [ ] Refresh the read model after save so map/detail state updates immediately
+### Objective
+
+Turn the upload tab into a real create flow that saves visits, optional photos, and optional text content through the existing Supabase-backed architecture.
+
+### Implementation
+
+- [x] Build photo upload UI with visible progress, success, and failure states
+- [x] Add text-entry creation flow
+- [x] Parse EXIF metadata on selected photos
+- [ ] Infer country/city automatically when practical and show confidence clearly
+- [x] Allow manual country/city correction before save
+- [x] Persist visits, photo assets, and travel posts from the create flow
+- [x] Refresh the read model after save so map/detail state updates immediately
+- [x] Add targeted tests for EXIF and create-flow helpers
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
 
 ## Later wave - Wave 6 polish and release hardening
 
