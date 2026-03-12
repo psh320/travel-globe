@@ -134,10 +134,10 @@ export function MobileMapExperience({
       mapViewport={
         <MapHost
           className="h-[min(70vh,38rem)] min-h-[22rem]"
+          countrySummaries={countrySummaries}
           onStateChange={applySnapshot}
           state={mapState}
           themeName="red"
-          visits={archiveVisits}
         />
       }
       onClosePanel={handleClosePanel}

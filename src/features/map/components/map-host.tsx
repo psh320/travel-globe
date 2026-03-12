@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 
-import { mockVisitRecords } from "@/features/map/data/mock-visit-records";
+import {
+  createMapArchiveIndex,
+  resolveMapCountrySummaries,
+} from "@/features/map/lib/map-archive";
 import {
   createMapHostSnapshot,
   defaultMapInteractionState,
@@ -11,13 +14,14 @@ import {
 } from "@/features/map/lib/map-interaction";
 import { loadWorldCountryRecords } from "@/features/map/lib/world-boundaries";
 import type { MapHostSnapshot, MapInteractionState } from "@/features/map/types";
-import { getCountryMapSummaries, type CountryMapSummary, type VisitRecord } from "@/lib/archive";
+import type { CountryMapSummary, VisitRecord } from "@/lib/archive";
 import { getTheme } from "@/lib/color-scale";
 
 import { WorldScene } from "./world-scene";
 
 export type MapHostProps = {
   className?: string;
+  countrySummaries?: CountryMapSummary[] | null;
   defaultState?: MapInteractionState;
   onOpenFocusedCountry?: (snapshot: MapHostSnapshot) => void;
   onReturnToWorld?: (snapshot: MapHostSnapshot) => void;
@@ -25,15 +29,12 @@ export type MapHostProps = {
   onStateChange?: (snapshot: MapHostSnapshot) => void;
   state?: MapInteractionState;
   themeName?: string | null;
-  visits?: VisitRecord[];
+  visits?: VisitRecord[] | null;
 };
-
-function createArchiveIndex(summaries: CountryMapSummary[]) {
-  return new Map(summaries.map((summary) => [summary.countryCode, summary]));
-}
 
 export function MapHost({
   className,
+  countrySummaries,
   defaultState = defaultMapInteractionState,
   onOpenFocusedCountry,
   onReturnToWorld,
@@ -41,15 +42,18 @@ export function MapHost({
   onStateChange,
   state,
   themeName = "red",
-  visits = mockVisitRecords,
+  visits,
 }: MapHostProps) {
   const [uncontrolledState, setUncontrolledState] = useState(defaultState);
   const countries = useMemo(() => loadWorldCountryRecords(), []);
   const archiveSummaries = useMemo(
-    () => getCountryMapSummaries(visits, { themeName }),
-    [themeName, visits],
+    () => resolveMapCountrySummaries({ countrySummaries, themeName, visits }),
+    [countrySummaries, themeName, visits],
   );
-  const archiveIndex = useMemo(() => createArchiveIndex(archiveSummaries), [archiveSummaries]);
+  const archiveIndex = useMemo(
+    () => createMapArchiveIndex(archiveSummaries),
+    [archiveSummaries],
+  );
   const theme = useMemo(() => getTheme(themeName), [themeName]);
   const currentState = state ?? uncontrolledState;
 
