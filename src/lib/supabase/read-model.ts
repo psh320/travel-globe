@@ -1,7 +1,9 @@
 import {
+  getCityGroupingSummaries,
   getCountryDetailSummary,
   getWorldMapCountrySummaries,
   type ArchiveVisitEntry,
+  type CityGroupSummary,
   type CountryDetailSummary,
   type VisitRecord,
   type WorldMapCountrySummary,
@@ -11,7 +13,10 @@ import { createOptionalSupabaseServerClient } from "@/lib/supabase/clients/serve
 import { listPhotoAssetsForUser } from "@/lib/supabase/repositories/photo-assets";
 import { listTravelPostsForUser } from "@/lib/supabase/repositories/travel-posts";
 import { listVisitsForUser } from "@/lib/supabase/repositories/visits";
-import type { ArchiveVisitDetail } from "@/lib/supabase/types";
+import {
+  toArchiveVisitEntries,
+  type ArchiveVisitDetail,
+} from "@/lib/supabase/types";
 
 type ReadModelOptions = {
   themeName?: string | null;
@@ -26,11 +31,51 @@ export type PersistedArchiveReadModel = {
 export function createArchiveVisitEntriesFromDetails(
   visitDetails: ArchiveVisitDetail[],
 ): ArchiveVisitEntry[] {
-  return visitDetails.map((detail) => ({
-    visit: detail.visit,
-    photoAssetCount: detail.photos.length,
-    travelPostCount: detail.posts.length,
-  }));
+  return toArchiveVisitEntries(visitDetails);
+}
+
+export function createPersistedArchiveReadModel(
+  visitDetails: ArchiveVisitDetail[],
+  options: ReadModelOptions = {},
+): PersistedArchiveReadModel {
+  const entries = createArchiveVisitEntriesFromDetails(visitDetails);
+
+  return {
+    entries,
+    visits: entries.map((entry) => entry.visit),
+    countrySummaries: getWorldMapCountrySummaries(entries, options),
+  };
+}
+
+export function getPersistedWorldMapCountrySummaries(
+  visitDetails: ArchiveVisitDetail[],
+  options: ReadModelOptions = {},
+): WorldMapCountrySummary[] {
+  return createPersistedArchiveReadModel(visitDetails, options).countrySummaries;
+}
+
+export function getPersistedCountryDetailSummary(
+  visitDetails: ArchiveVisitDetail[],
+  countryCode: string,
+  options: ReadModelOptions = {},
+): CountryDetailSummary | null {
+  return getCountryDetailSummary(
+    createArchiveVisitEntriesFromDetails(visitDetails),
+    countryCode,
+    options,
+  );
+}
+
+export function getPersistedCityGroupingSummaries(
+  visitDetails: ArchiveVisitDetail[],
+  countryCode?: string | null,
+  options: ReadModelOptions = {},
+): CityGroupSummary[] {
+  return getCityGroupingSummaries(
+    createArchiveVisitEntriesFromDetails(visitDetails),
+    countryCode,
+    options,
+  );
 }
 
 export async function getCurrentUserPersistedArchiveReadModel(
@@ -44,13 +89,7 @@ export async function getCurrentUserPersistedArchiveReadModel(
   }
 
   const visitDetails = await listVisitsForUser(supabase, user.id);
-  const entries = createArchiveVisitEntriesFromDetails(visitDetails);
-
-  return {
-    entries,
-    visits: entries.map((entry) => entry.visit),
-    countrySummaries: getWorldMapCountrySummaries(entries, options),
-  };
+  return createPersistedArchiveReadModel(visitDetails, options);
 }
 
 export async function getCurrentUserPersistedCountryDetail(
@@ -64,6 +103,19 @@ export async function getCurrentUserPersistedCountryDetail(
   }
 
   return getCountryDetailSummary(archiveReadModel.entries, countryCode, options);
+}
+
+export async function getCurrentUserPersistedCityGroupingSummaries(
+  countryCode?: string | null,
+  options: ReadModelOptions = {},
+): Promise<CityGroupSummary[] | null> {
+  const archiveReadModel = await getCurrentUserPersistedArchiveReadModel(options);
+
+  if (!archiveReadModel) {
+    return null;
+  }
+
+  return getCityGroupingSummaries(archiveReadModel.entries, countryCode, options);
 }
 
 export async function getCurrentUserPersistedArchiveRelations() {
