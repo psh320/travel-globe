@@ -60,3 +60,26 @@ export async function listPhotoAssetsForVisit(
     ),
   );
 }
+
+export async function listPhotoAssetsForUser(
+  supabase: DbClient,
+  userId: string,
+  resolvePublicUrl?: PhotoAssetUrlResolver,
+): Promise<ArchivePhotoAsset[]> {
+  const { data, error } = await supabase
+    .from("photo_assets")
+    .select("*")
+    .eq("user_id", userId)
+    .order("captured_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return Promise.all(
+    (data as PersistedPhotoAssetRow[]).map((asset) =>
+      toArchivePhotoAsset(asset, resolvePublicUrl),
+    ),
+  );
+}

@@ -47,3 +47,20 @@ export async function listTravelPostsForVisit(
 
   return (data as PersistedTravelPostRecord[]).map(toArchiveTravelPost);
 }
+
+export async function listTravelPostsForUser(
+  supabase: DbClient,
+  userId: string,
+): Promise<ArchiveTravelPost[]> {
+  const { data, error } = await supabase
+    .from("travel_posts")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data as PersistedTravelPostRecord[]).map(toArchiveTravelPost);
+}

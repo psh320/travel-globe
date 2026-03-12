@@ -1,5 +1,6 @@
 export * from "@/lib/supabase/auth";
 export * from "@/lib/supabase/constants";
+export * from "@/lib/supabase/read-model";
 export * from "@/lib/supabase/storage";
 export * from "@/lib/supabase/types";
 export * from "@/lib/supabase/clients/admin";

@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 
+import type { ArchiveVisitEntry } from "@/lib/archive";
+
 const MobileMapExperience = dynamic(
   () =>
     import("@/features/mobile-shell/components/mobile-map-experience").then(
@@ -12,6 +14,10 @@ const MobileMapExperience = dynamic(
   },
 );
 
-export function MobileMapEntry() {
-  return <MobileMapExperience />;
+export function MobileMapEntry({
+  initialArchiveEntries,
+}: {
+  initialArchiveEntries?: ArchiveVisitEntry[];
+}) {
+  return <MobileMapExperience initialArchiveEntries={initialArchiveEntries} />;
 }

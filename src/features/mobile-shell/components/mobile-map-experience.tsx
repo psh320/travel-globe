@@ -12,9 +12,11 @@ import {
 } from "@/features/map/lib/map-interaction";
 import type { MapHostSnapshot, MapInteractionState } from "@/features/map/types";
 import {
+  createArchiveVisitEntries,
+  getCountryDetailSummary,
+  getWorldMapCountrySummaries,
   getArchiveCounts,
-  getCityMapSummaries,
-  getCountryMapSummaries,
+  type ArchiveVisitEntry,
 } from "@/lib/archive";
 
 import {
@@ -24,35 +26,51 @@ import {
 import type { ArchiveHighlight, PanelTab } from "../types";
 import { AppShell } from "./app-shell";
 
-export function MobileMapExperience() {
+type MobileMapExperienceProps = {
+  initialArchiveEntries?: ArchiveVisitEntry[];
+};
+
+export function MobileMapExperience({
+  initialArchiveEntries,
+}: MobileMapExperienceProps) {
   const [mapState, setMapState] = useState<MapInteractionState>(
     defaultMapInteractionState,
   );
   const [panelTab, setPanelTab] = useState<PanelTab | null>(null);
+  const archiveEntries = useMemo(
+    () => initialArchiveEntries ?? createArchiveVisitEntries(mockVisitRecords),
+    [initialArchiveEntries],
+  );
+  const archiveVisits = useMemo(
+    () => archiveEntries.map((entry) => entry.visit),
+    [archiveEntries],
+  );
 
   const countrySummaries = useMemo(
-    () => getCountryMapSummaries(mockVisitRecords, { themeName: "red" }),
-    [],
+    () => getWorldMapCountrySummaries(archiveEntries, { themeName: "red" }),
+    [archiveEntries],
   );
   const selectedCountry = useMemo(
     () => deriveSelectedCountry(mapState.selectedCountryCode, countrySummaries),
     [countrySummaries, mapState.selectedCountryCode],
   );
-  const citySummaries = useMemo(
+  const countryDetail = useMemo(
     () =>
-      getCityMapSummaries(
-        mockVisitRecords,
-        selectedCountry?.countryCode ?? null,
-        { themeName: "red" },
-      ),
-    [selectedCountry],
+      selectedCountry
+        ? getCountryDetailSummary(archiveEntries, selectedCountry.countryCode, {
+            themeName: "red",
+          })
+        : null,
+    [archiveEntries, selectedCountry],
   );
-  const archiveCounts = useMemo(() => getArchiveCounts(mockVisitRecords), []);
-  const archiveHighlights: ArchiveHighlight[] = citySummaries.slice(0, 4).map((city) => ({
-    id: `${city.countryCode}-${city.cityName}`,
-    title: city.cityName,
-    subtitle: `${city.visitCount} entries • bucket ${city.intensityBucket}`,
-  }));
+  const archiveCounts = useMemo(() => getArchiveCounts(archiveVisits), [archiveVisits]);
+  const archiveHighlights: ArchiveHighlight[] = (countryDetail?.cityGroups ?? [])
+    .slice(0, 4)
+    .map((city) => ({
+      id: `${city.countryCode}-${city.cityName}`,
+      title: city.cityName,
+      subtitle: `${city.visitCount} entries • ${city.photoAssetCount} photos • ${city.travelPostCount} posts`,
+    }));
   const worldArchiveNotes = [
     `${archiveCounts.totalVisits} saved visits are ready for archive browsing.`,
     `${archiveCounts.countriesVisited} countries and ${archiveCounts.citiesVisited} cities are available in the current archive dataset.`,
@@ -119,7 +137,7 @@ export function MobileMapExperience() {
           onStateChange={applySnapshot}
           state={mapState}
           themeName="red"
-          visits={mockVisitRecords}
+          visits={archiveVisits}
         />
       }
       onClosePanel={handleClosePanel}
