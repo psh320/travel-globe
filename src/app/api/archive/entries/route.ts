@@ -38,6 +38,13 @@ export async function POST(request: Request) {
       countryName: formData.get("countryName")?.toString() ?? "",
       fileName: file instanceof File ? file.name : null,
       fileSizeBytes: file instanceof File ? file.size : null,
+      inferredCityName: formData.get("inferredCityName")?.toString() || null,
+      inferredConfidenceLevel:
+        parseOptionalConfidence(formData.get("inferredConfidenceLevel")),
+      inferredCountryCode:
+        formData.get("inferredCountryCode")?.toString() || null,
+      inferredCountryName:
+        formData.get("inferredCountryName")?.toString() || null,
       inferredLatitude: parseOptionalNumber(formData.get("inferredLatitude")),
       inferredLongitude: parseOptionalNumber(formData.get("inferredLongitude")),
       mimeType: file instanceof File ? file.type : null,
@@ -55,6 +62,8 @@ export async function POST(request: Request) {
       content: formData.get("content")?.toString() ?? null,
       countryCode: formData.get("countryCode")?.toString() ?? "",
       countryName: formData.get("countryName")?.toString() ?? "",
+      inferredConfidenceLevel:
+        parseOptionalConfidence(formData.get("inferredConfidenceLevel")),
       sourceType,
       title: formData.get("title")?.toString() ?? null,
       userId: user.id,
@@ -77,6 +86,13 @@ export async function POST(request: Request) {
         content: formData.get("content")?.toString() ?? null,
         countryCode: formData.get("countryCode")?.toString() ?? "",
         countryName: formData.get("countryName")?.toString() ?? "",
+        inferredCityName: formData.get("inferredCityName")?.toString() || null,
+        inferredConfidenceLevel:
+          parseOptionalConfidence(formData.get("inferredConfidenceLevel")),
+        inferredCountryCode:
+          formData.get("inferredCountryCode")?.toString() || null,
+        inferredCountryName:
+          formData.get("inferredCountryName")?.toString() || null,
         fileName: file.name,
         fileSizeBytes: file.size,
         inferredLatitude: parseOptionalNumber(formData.get("inferredLatitude")),
@@ -144,4 +160,19 @@ function parseOptionalNumber(value: FormDataEntryValue | null) {
   const parsed = Number(normalized);
 
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseOptionalConfidence(value: FormDataEntryValue | null) {
+  const normalized = value?.toString().trim();
+
+  if (
+    normalized === "high" ||
+    normalized === "medium" ||
+    normalized === "low" ||
+    normalized === "manual"
+  ) {
+    return normalized;
+  }
+
+  return null;
 }

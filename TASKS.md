@@ -84,7 +84,7 @@ Turn the upload tab into a real create flow that saves visits, optional photos, 
 - [x] Build photo upload UI with visible progress, success, and failure states
 - [x] Add text-entry creation flow
 - [x] Parse EXIF metadata on selected photos
-- [ ] Infer country/city automatically when practical and show confidence clearly
+- [x] Infer country automatically from GPS when practical and show confidence clearly
 - [x] Allow manual country/city correction before save
 - [x] Persist visits, photo assets, and travel posts from the create flow
 - [x] Refresh the read model after save so map/detail state updates immediately
@@ -93,7 +93,13 @@ Turn the upload tab into a real create flow that saves visits, optional photos, 
 - [x] `npm run test`
 - [x] `npm run build`
 
-## Later wave - Wave 6 polish and release hardening
+## Current wave - Wave 6 polish and release hardening
+
+### Objective
+
+Harden the integrated archive experience for release with smoother interaction, better performance, broader test coverage, and final architecture cleanup.
+
+### Planned work
 
 - [ ] Improve animation quality
 - [ ] Improve rendering and interaction performance

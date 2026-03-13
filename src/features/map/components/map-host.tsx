@@ -108,7 +108,7 @@ export function MapHost({
     <div
       className={
         className ??
-        "relative h-[min(70vh,38rem)] min-h-[22rem] overflow-hidden rounded-[1.75rem] border border-[rgba(23,33,38,0.1)] bg-[#f4f1e8]"
+        "relative h-[min(70vh,38rem)] min-h-[22rem] overflow-hidden rounded-[1.75rem] border border-[rgba(130,111,95,0.12)] bg-[radial-gradient(circle_at_top,#fff8ef,transparent_30%),linear-gradient(180deg,#f5ede0_0%,#ecdfcc_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
       }
       data-country-code={currentState.selectedCountryCode ?? undefined}
       data-view-mode={currentState.viewMode}

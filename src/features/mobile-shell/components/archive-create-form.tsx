@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { extractExifMetadata } from "@/lib/exif/parse";
+import { inferCountryFromCoordinates } from "@/lib/geo/country-inference";
 
 type ArchiveCreateFormProps = {
   defaultCityName?: string | null;
@@ -17,6 +18,10 @@ type DraftState = {
   content: string;
   countryCode: string;
   countryName: string;
+  inferredConfidenceLevel: "" | "high" | "medium" | "low" | "manual";
+  inferredCountryCode: string;
+  inferredCountryName: string;
+  inferredCityName: string;
   inferredLatitude: string;
   inferredLongitude: string;
   sourceType: "photo" | "text";
@@ -29,6 +34,10 @@ const emptyDraft: DraftState = {
   content: "",
   countryCode: "",
   countryName: "",
+  inferredConfidenceLevel: "",
+  inferredCountryCode: "",
+  inferredCountryName: "",
+  inferredCityName: "",
   inferredLatitude: "",
   inferredLongitude: "",
   sourceType: "photo",
@@ -76,9 +85,27 @@ export function ArchiveCreateForm({
 
     try {
       const metadata = extractExifMetadata(await file.arrayBuffer());
+      const inferredCountry = inferCountryFromCoordinates(
+        metadata.latitude,
+        metadata.longitude,
+      );
 
       setDraft((current) => ({
         ...current,
+        countryCode:
+          current.countryCode ||
+          inferredCountry?.countryCode ||
+          current.countryCode,
+        countryName:
+          current.countryName ||
+          inferredCountry?.countryName ||
+          current.countryName,
+        inferredConfidenceLevel:
+          inferredCountry?.confidenceLevel ?? current.inferredConfidenceLevel,
+        inferredCountryCode:
+          inferredCountry?.countryCode ?? current.inferredCountryCode,
+        inferredCountryName:
+          inferredCountry?.countryName ?? current.inferredCountryName,
         visitedAt: current.visitedAt || toDateInputValue(metadata.capturedAt),
         inferredLatitude:
           metadata.latitude !== null ? String(metadata.latitude) : current.inferredLatitude,
@@ -89,7 +116,11 @@ export function ArchiveCreateForm({
       }));
 
       if (metadata.latitude !== null && metadata.longitude !== null) {
-        setStatusMessage("EXIF coordinates found. Confirm the location before saving.");
+        setStatusMessage(
+          inferredCountry
+            ? `EXIF coordinates found. Suggested ${inferredCountry.countryName} with ${inferredCountry.confidenceLevel} confidence.`
+            : "EXIF coordinates found. Confirm the location before saving.",
+        );
       } else if (metadata.capturedAt) {
         setStatusMessage("Capture date found. Add or confirm the place before saving.");
       } else {
@@ -140,6 +171,10 @@ export function ArchiveCreateForm({
         body.set("visitedAt", toIsoDateTime(draft.visitedAt));
         body.set("title", draft.title);
         body.set("content", draft.content);
+        body.set("inferredConfidenceLevel", draft.inferredConfidenceLevel);
+        body.set("inferredCountryCode", draft.inferredCountryCode);
+        body.set("inferredCountryName", draft.inferredCountryName);
+        body.set("inferredCityName", draft.inferredCityName);
         body.set("inferredLatitude", draft.inferredLatitude);
         body.set("inferredLongitude", draft.inferredLongitude);
 
@@ -172,14 +207,14 @@ export function ArchiveCreateForm({
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-2 gap-2 rounded-[1.25rem] bg-[#eef1ec] p-1">
+      <div className="grid grid-cols-2 gap-2 rounded-[1.25rem] bg-[rgba(216,226,220,0.72)] p-1">
         {(["photo", "text"] as const).map((mode) => (
           <button
             key={mode}
             className={`min-h-11 rounded-2xl px-3 text-sm font-semibold capitalize ${
               draft.sourceType === mode
-                ? "bg-white text-[#172126] shadow-sm"
-                : "text-[#5f6d72]"
+                ? "bg-[rgba(255,255,255,0.92)] text-[#172126] shadow-sm"
+                : "text-[var(--muted)]"
             }`}
             onClick={() => updateDraft("sourceType", mode)}
             type="button"
@@ -190,7 +225,7 @@ export function ArchiveCreateForm({
       </div>
 
       {draft.sourceType === "photo" ? (
-        <label className="block rounded-[1.5rem] border border-dashed border-[rgba(23,33,38,0.16)] bg-white px-4 py-5 text-sm text-[#5f6d72]">
+        <label className="block rounded-[1.5rem] border border-dashed border-[rgba(23,33,38,0.16)] bg-[rgba(255,255,255,0.84)] px-4 py-5 text-sm text-[var(--muted)]">
           <span className="block text-sm font-semibold text-[#172126]">
             Choose a photo
           </span>
@@ -237,6 +272,15 @@ export function ArchiveCreateForm({
         />
       </div>
 
+      {draft.inferredCountryCode ? (
+        <div className="rounded-[1.25rem] border border-[rgba(15,118,110,0.12)] bg-[rgba(213,236,232,0.75)] px-4 py-3 text-sm text-[#0f766e]">
+          Suggested country: {draft.inferredCountryName} ({draft.inferredCountryCode})
+          {draft.inferredConfidenceLevel
+            ? ` • ${draft.inferredConfidenceLevel} confidence`
+            : ""}
+        </div>
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
           label="Latitude (optional)"
@@ -276,19 +320,19 @@ export function ArchiveCreateForm({
       </label>
 
       {statusMessage ? (
-        <p className="rounded-[1.25rem] bg-[#eef7f5] px-4 py-3 text-sm text-[#0f766e]">
+        <p className="rounded-[1.25rem] border border-[rgba(15,118,110,0.12)] bg-[rgba(213,236,232,0.75)] px-4 py-3 text-sm text-[#0f766e]">
           {statusMessage}
         </p>
       ) : null}
 
       {errorMessage ? (
-        <p className="rounded-[1.25rem] bg-[#fdecec] px-4 py-3 text-sm text-[#b42318]">
+        <p className="rounded-[1.25rem] border border-[rgba(180,35,24,0.12)] bg-[#fdecec] px-4 py-3 text-sm text-[#b42318]">
           {errorMessage}
         </p>
       ) : null}
 
       <button
-        className="min-h-12 w-full rounded-2xl bg-[#0f766e] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-12 w-full rounded-2xl bg-[var(--accent)] px-4 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(143,61,34,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
         disabled={
           isPending ||
           !draft.countryCode ||
@@ -327,7 +371,7 @@ function Field({
     <label className="block space-y-2">
       <span className="text-sm font-semibold text-[#172126]">{label}</span>
       <input
-        className="min-h-12 w-full rounded-[1.25rem] border border-[rgba(23,33,38,0.12)] bg-white px-4 text-sm text-[#172126] outline-none transition focus:border-[#0f766e]"
+        className="min-h-12 w-full rounded-[1.25rem] border border-[rgba(23,33,38,0.12)] bg-[rgba(255,255,255,0.84)] px-4 text-sm text-[#172126] outline-none transition focus:border-[var(--accent)]"
         onChange={(event) => onChange(event.currentTarget.value)}
         placeholder={placeholder}
         type={type}

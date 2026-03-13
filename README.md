@@ -122,7 +122,7 @@ This keeps object ownership aligned with row-level policies and lets the app der
 - `photo_assets` stores raw EXIF coordinates, inferred location fields, and confidence snapshots
 - signed or public photo URLs should be derived from `storage_bucket` + `storage_path` at read time, not stored as durable source-of-truth fields
 - Manual corrections should update the visit location and set `location_confidence` to `manual`, preserving the original inference snapshot on the photo asset
-- The current create flow performs best-effort EXIF extraction for capture date and GPS coordinates, while country/city remain manually confirmable before save
+- The current create flow performs best-effort EXIF extraction for capture date and GPS coordinates, then infers a country offline from bundled world geometry with explicit confidence before save
 
 ---
 
@@ -140,6 +140,7 @@ The current integrated shell now:
 - opens a mobile-first country detail sheet with real stats and city grouping
 - shows recent saved memories and top-country summaries in the archive panel
 - supports saving photo visits and text memories from the upload tab
+- suggests a country automatically from EXIF GPS when photo coordinates are available
 - falls back to mock archive data when persisted user data is unavailable
 
 ---
@@ -188,7 +189,7 @@ Work is organized in **waves**. The repository has already completed:
 - Wave 4: archive UX hardening
 - Wave 5: archive creation flow
 
-The next implementation wave is polish and hardening: stronger inference, smoother motion, rendering/performance tuning, and e2e coverage for the primary journey.
+The next implementation wave is polish and hardening: smoother motion, rendering/performance tuning, broader test coverage, and final architecture cleanup before release.
 
 ---
 

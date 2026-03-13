@@ -13,6 +13,10 @@ export type ArchiveCreateInput = {
   countryName: string;
   fileName?: string | null;
   fileSizeBytes?: number | null;
+  inferredCityName?: string | null;
+  inferredConfidenceLevel?: "high" | "medium" | "low" | "manual" | null;
+  inferredCountryCode?: string | null;
+  inferredCountryName?: string | null;
   inferredLatitude?: number | null;
   inferredLongitude?: number | null;
   mimeType?: string | null;
@@ -62,7 +66,7 @@ export function buildVisitDraft(input: ArchiveCreateInput): VisitDraft {
     country_name: normalized.countryName,
     latitude: normalized.inferredLatitude ?? null,
     longitude: normalized.inferredLongitude ?? null,
-    location_confidence: "manual",
+    location_confidence: normalized.inferredConfidenceLevel ?? "manual",
     source_type: normalized.sourceType,
     visited_at: normalized.visitedAt || null,
   };
@@ -110,15 +114,12 @@ export function buildPhotoAssetDraft(
     }),
     exif_latitude: normalized.inferredLatitude ?? null,
     exif_longitude: normalized.inferredLongitude ?? null,
-    inferred_country_code: null,
-    inferred_country_name: null,
-    inferred_city_name: null,
+    inferred_country_code: normalized.inferredCountryCode ?? null,
+    inferred_country_name: normalized.inferredCountryName ?? null,
+    inferred_city_name: normalized.inferredCityName ?? null,
     inferred_latitude: normalized.inferredLatitude ?? null,
     inferred_longitude: normalized.inferredLongitude ?? null,
-    inferred_location_confidence:
-      normalized.inferredLatitude !== null && normalized.inferredLongitude !== null
-        ? "low"
-        : null,
+    inferred_location_confidence: normalized.inferredConfidenceLevel ?? null,
     metadata: {},
   };
 }

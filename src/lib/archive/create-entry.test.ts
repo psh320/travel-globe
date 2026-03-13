@@ -12,6 +12,7 @@ describe("archive create helpers", () => {
       buildVisitDraft({
         countryCode: "jp",
         countryName: "Japan",
+        inferredConfidenceLevel: "medium",
         sourceType: "text",
         userId: "user-1",
         visitId: "visit-1",
@@ -22,7 +23,7 @@ describe("archive create helpers", () => {
         country_code: "JP",
         country_name: "Japan",
         source_type: "text",
-        location_confidence: "manual",
+        location_confidence: "medium",
       }),
     );
   });
@@ -64,6 +65,9 @@ describe("archive create helpers", () => {
         countryName: "France",
         fileName: "Paris Sunset.JPG",
         fileSizeBytes: 1234,
+        inferredConfidenceLevel: "low",
+        inferredCountryCode: "FR",
+        inferredCountryName: "France",
         mimeType: "image/jpeg",
         photoAssetId: "asset-1",
         sourceType: "photo",
@@ -73,6 +77,9 @@ describe("archive create helpers", () => {
     ).toEqual(
       expect.objectContaining({
         file_name: "Paris Sunset.JPG",
+        inferred_country_code: "FR",
+        inferred_country_name: "France",
+        inferred_location_confidence: "low",
         storage_path: "user-1/visit-1/asset-1/paris-sunset.jpg",
         visit_id: "visit-1",
       }),
